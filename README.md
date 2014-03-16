@@ -54,9 +54,10 @@ Next steps
      * HTML/JavaScript-based websites.
  2. Fine-tunes the rules: How much points for what action?
  3. Pre-seed it with a bunch of words and explanations.
- 4. Provide quick-start data for the players (Dumps of Wikipedia, Wiktionary,
+ 4. Create documentation (github pages? entropia wiki?)
+ 5. Provide quick-start data for the players (Dumps of Wikipedia, Wiktionary,
     Project Gutenberg)
- 5. Enjoy!
+ 6. Enjoy!
 
 Who
 ---
