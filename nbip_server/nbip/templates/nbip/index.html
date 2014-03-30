@@ -1,0 +1,14 @@
+{% extends "nbip/base.html" %}
+
+{% block title %}Willkommen{% endblock %}
+
+{% block content %}
+<h1>No bot is perfect</h1>
+<p>Willkommen zum Programmierspiel der GPN’14.
+Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörter" }} und {{ n_explanations }} Erklärung{{ n_explanations|pluralize:"en"}}.</p>
+<ul>
+<li><a href="{% url 'submit' %}">Neue Wörter beitragen</a></li>
+<li><a href="{% url 'explain' %}">Wörter erklären</a></li>
+<li><a href="{% url 'guess' %}">Erklärungen raten</a></li>
+</ul>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "nbip/base.html" %}
+
+{% block title %}Neues Wort einreichen{% endblock %}
+
+{% block content %}
+<h1>No bot is perfect</h1>
+<form action="" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Submit" />
+</form>
+
+{% endblock %}

@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from nbip.models import Word, Explanation
+
+admin.site.register(Word)
+admin.site.register(Explanation)

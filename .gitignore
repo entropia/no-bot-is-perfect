@@ -1,0 +1,2 @@
+*.py[cod]
+nbip_server/db.sqlite3
