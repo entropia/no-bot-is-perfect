@@ -1,12 +1,11 @@
 # coding=utf-8
 
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from django.forms import Form, ModelForm, CharField, HiddenInput
+from django.shortcuts import render, redirect, get_object_or_404
+from django.forms import Form, ModelForm, CharField, HiddenInput, ChoiceField
 from django.contrib import messages
 from django.core.signing import Signer
 
-from nbip.models import Word, Explanation
+from nbip.models import *
 
 def index(request):
     context = {
@@ -27,7 +26,7 @@ def submit(request):
         if form.is_valid():
             word = form.save()
             messages.success(request, u"Vielen Dank für Deinen Beitrag „%s“!" % word.lemma)
-            return HttpResponseRedirect('/')
+            return redirect('index')
     else:
         form = SubmitForm()
 
@@ -52,7 +51,7 @@ def explain(request):
             explanation = Explanation(word=word, explanation= form.cleaned_data['explanation'])
             explanation.save()
             messages.success(request, u"Vielen Dank für Deine Erklärung zu „%s“!" % word.lemma)
-            return HttpResponseRedirect('/')
+            return redirect('index')
     else:
         # TODO: Select a word that the user has not seen before
         # (not submitted nor explained)
@@ -65,7 +64,36 @@ def explain(request):
     }
     return render(request, 'nbip/explain.html', context)
 
-def guess(request):
+def new_guess(request):
+    # Create a new game
+    # TODO: For the current player
+    # and switch to it (or to the existing running game)
+    running_rounds = GameRound.objects.filter(guess__exact=None)
+    if running_rounds:
+        round = running_rounds[0]
+        return redirect('guess', round.pk)
+    else:
+        round = GameRound.start_new_round()
+        return redirect('guess', round.pk)
+
+def guess(request, round_id):
+    round = get_object_or_404(GameRound, pk=round_id)
+    expls = [None,None,None,None,None]
+    expls[round.pos] = round.word.correct_explanation
+    for e in GameRoundEntry.objects.filter(gameround=round):
+        expls[e.pos] = e.explanation.explanation
+
+    # TODO: Check permissions
+    if request.method == 'POST':
+        # TODO: Check if input is valid
+
+        # TODO: Set values (field "guess"), and redirect
+        pass
+
+    # Sort explanations appropriately
     context = {
-    }
+        'word': round.word,
+        'explanations': expls,
+        }
     return render(request, 'nbip/guess.html', context)
+

@@ -6,5 +6,6 @@ urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
     url(r'^submit/$', views.submit, name='submit'),
     url(r'^explain/$', views.explain, name='explain'),
-    url(r'^guess/$', views.guess, name='guess'),
+    url(r'^guess/$', views.new_guess, name='new_guess'),
+    url(r'^guess/(\d+)/$', views.guess, name='guess'),
 )

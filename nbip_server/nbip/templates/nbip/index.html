@@ -9,6 +9,6 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörter" }} und {{ n_
 <ul>
 <li><a href="{% url 'submit' %}">Neue Wörter beitragen</a></li>
 <li><a href="{% url 'explain' %}">Wörter erklären</a></li>
-<li><a href="{% url 'guess' %}">Erklärungen raten</a></li>
+<li><a href="{% url 'new_guess' %}">Erklärungen raten</a></li>
 </ul>
 {% endblock %}
