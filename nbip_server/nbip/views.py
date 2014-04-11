@@ -78,22 +78,33 @@ def new_guess(request):
 
 def guess(request, round_id):
     round = get_object_or_404(GameRound, pk=round_id)
-    expls = [None,None,None,None,None]
-    expls[round.pos] = round.word.correct_explanation
-    for e in GameRoundEntry.objects.filter(gameround=round):
-        expls[e.pos] = e.explanation.explanation
+    if round.guess is not None:
+        return redirect('view_guess', round.pk)
+    expls = round.get_explanations()
 
     # TODO: Check permissions
     if request.method == 'POST':
-        # TODO: Check if input is valid
+        guesses = []
+        for n in range(5):
+            guesses.append(int(request.POST['guess%d' % n]))
 
-        # TODO: Set values (field "guess"), and redirect
-        pass
+        round.set_guesses(guesses)
+        return redirect('view_guess', round.pk)
 
-    # Sort explanations appropriately
     context = {
         'word': round.word,
         'explanations': expls,
         }
     return render(request, 'nbip/guess.html', context)
 
+def view_guess(request, round_id):
+    round = get_object_or_404(GameRound, pk=round_id)
+    if round.guess is None:
+        return redirect('guess', round.pk)
+    expls = round.get_explanations()
+
+    context = {
+        'word': round.word,
+        'explanations': expls,
+        }
+    return render(request, 'nbip/view_guess.html', context)

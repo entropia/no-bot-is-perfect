@@ -5,10 +5,28 @@ import random
 from django.db import models, transaction
 from django.db.models import Count
 
-# Custom fields
+# Enumeration type
+class Guess(int):
+    def __init__(self, value):
+        assert 0 <= value < 3, "value %s out of range" % value
 
+    def __unicode__(self):
+        return {
+            0: 'Richtig',
+            1: 'Mensch',
+            2: 'Computer',
+        }[self]
+
+# Constants
+CORRECT = Guess(0)
+HUMAN = Guess(1)
+COMPUTER = Guess(2)
+
+# Custom fields
 class GuessField(models.PositiveSmallIntegerField):
     description = "Choice: Correct, Human or Bot"
+
+    __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         kwargs['choices'] = [ (0, 'Richtig')
@@ -17,6 +35,15 @@ class GuessField(models.PositiveSmallIntegerField):
            ]
         kwargs['null'] = True
         super(GuessField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if value is None:
+            return None
+
+        if isinstance(value, Guess):
+            return value
+
+        return Guess(value)
 
 # Exceptions
 
@@ -79,6 +106,9 @@ class GameRound(models.Model):
     # What the user guessed for the correct result
     guess = GuessField()
 
+    def __unicode__(self):
+        return "%s (%d)" % (self.word.lemma, self.id)
+
     @classmethod
     @transaction.atomic
     def start_new_round(cls):
@@ -93,23 +123,60 @@ class GameRound(models.Model):
             round = GameRound(
                 word = word,
                 guess = None,
-                pos = poss[0],
+                pos = poss.pop(),
                 )
             round.save()
-            for e, n in zip(expl,[1,2,3,4]):
+            for e in expl:
                 GameRoundEntry(
                     gameround = round,
                     explanation = e,
-                    pos = n,
+                    pos = poss.pop(),
                     guess = None,
                 ).save()
             return round
+
+    def get_explanations(self):
+        expls = [None,None,None,None,None]
+        expls[self.pos] = {
+            'text': self.word.correct_explanation,
+            'guess': self.guess,
+            'actual': CORRECT,
+        }
+        for e in GameRoundEntry.objects.filter(gameround=self):
+            expls[e.pos] = {
+                    'text': e.explanation.explanation,
+                    'guess': e.guess,
+                    'actual': HUMAN, # TODO: COMPUTER
+            }
+        return expls
+
+
+    @transaction.atomic
+    def set_guesses(self, guesses):
+        # TODO: These assertions should be enforced by the client code (JS)
+        assert self.guess is None
+        assert len(guesses) == 5
+        for g in guesses:
+            assert len(guesses) == 5
+
+        assert guesses.count(CORRECT) == 1, "Not exactly one answer 'correct'"
+        assert guesses.count(HUMAN) == 2, "Not exactly two answers 'human'"
+        assert guesses.count(COMPUTER) == 2, "Not exactly two answers 'computer'"
+
+        self.guess = guesses[self.pos]
+        for e in GameRoundEntry.objects.filter(gameround=self):
+            assert e.pos < 5
+            e.guess = guesses[e.pos]
+            e.save()
+        self.save()
 
 
 class GameRoundEntry(models.Model):
     class Meta:
         verbose_name = u"Spielrunden-Erkärung"
         verbose_name_plural = u"Spielrunden-Erkärung"
+        ordering = ['pos']
+        unique_together = ('gameround','explanation','pos')
 
     gameround = models.ForeignKey(GameRound)
     explanation = models.ForeignKey(Explanation)

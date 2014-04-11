@@ -4,13 +4,13 @@
 
 {% block content %}
 <h1>No bot is perfect</h1>
-<p>Was mag denn ein {{ round.word.lemma }} sein?</p>
+<p>Was mag denn ein {{ word.lemma }} sein?</p>
 <form action="" method="post">
 {% csrf_token %}
 <ul>
 {% for e in explanations %}
 <li>
-<label for="guess{{forloop.counter0}}">{{ e }}</label> <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
+<label for="guess{{forloop.counter0}}">{{ e.text }}</label> <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
 <option value=""></option>
 <option value="0">Richtig</option>
 <option value="1">Mensch</option>
