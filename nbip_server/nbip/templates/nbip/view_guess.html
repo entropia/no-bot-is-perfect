@@ -1,0 +1,18 @@
+{% extends "nbip/base.html" %}
+
+{% block title %}Was ist richtig?{% endblock %}
+
+{% block content %}
+<h1>No bot is perfect</h1>
+<p>Was mag denn ein {{ word.lemma }} sein?</p>
+<ul>
+{% for e in explanations %}
+<li>
+{{ e.text }}. Du dachtest {{ e.guess }}; richtig ist {{ e.actual }}.
+</li>
+{% endfor %}
+</ul>
+
+<a href="{% url "new_guess" %}">Nochmal spielen</a>
+
+{% endblock %}
