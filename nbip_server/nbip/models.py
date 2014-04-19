@@ -4,6 +4,8 @@ import random
 
 from django.db import models, transaction
 from django.db.models import Count
+from django.contrib.auth.models import User
+
 
 # Enumeration type
 class Guess(int):
@@ -69,6 +71,8 @@ class Word(models.Model):
             help_text = u"URL zu Wikipedia o.ä.")
 
     created = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, verbose_name="Autor")
+
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
@@ -91,6 +95,7 @@ class Explanation(models.Model):
     explanation = models.CharField(max_length=1000,
             verbose_name= u"Erklärung",
             help_text= u"<i>Wort</i> ist ein/eine <i>Erklärung</i>")
+    author = models.ForeignKey(User, verbose_name="Autor")
 
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
@@ -105,13 +110,14 @@ class GameRound(models.Model):
     pos = models.PositiveSmallIntegerField()
     # What the user guessed for the correct result
     guess = GuessField()
+    player = models.ForeignKey(User, verbose_name="Spieler")
 
     def __unicode__(self):
         return "%s (%d)" % (self.word.lemma, self.id)
 
     @classmethod
     @transaction.atomic
-    def start_new_round(cls):
+    def start_new_round(cls, player):
         word = Word.random()
         expls = word.explanation_set.all()
         # TODO: Shuffle:
@@ -124,6 +130,7 @@ class GameRound(models.Model):
                 word = word,
                 guess = None,
                 pos = poss.pop(),
+                player = player,
                 )
             round.save()
             for e in expl:
