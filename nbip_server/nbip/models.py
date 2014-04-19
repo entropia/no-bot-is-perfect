@@ -6,6 +6,9 @@ from django.db import models, transaction
 from django.db.models import Count
 from django.contrib.auth.models import User
 
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 
 # Enumeration type
 class Guess(int):
@@ -73,6 +76,9 @@ class Word(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, verbose_name="Autor")
 
+    n_explanations = models.PositiveIntegerField(
+            verbose_name = "Anzahl Erklärungen",
+            default = 0)
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
@@ -90,6 +96,10 @@ class Word(models.Model):
             raise NotEnoughWordsException()
         return random.choice(words)
 
+    def update_cached_fields(self):
+        self.n_explanations = Explanation.objects.filter(word__exact = self.id).count()
+        self.save()
+
     def __unicode__(self):
         return self.lemma
 
@@ -106,6 +116,13 @@ class Explanation(models.Model):
 
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
+
+# Keep Word.n_explanations up-to-date
+@receiver(post_save, sender=Explanation)
+@receiver(post_delete, sender=Explanation)
+def update_word(sender, instance, **kwargs):
+    instance.word.update_cached_fields()
+
 
 class GameRound(models.Model):
     class Meta:

@@ -3,8 +3,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from nbip.models import *
 
-class SelectionMethodTests(TestCase):
-    def setUp(self):
+class NbipTestCase(TestCase):
+    def addUsers(self):
         self.users = []
         for i in range(1,7):
             self.users.append(User.objects.create_user(
@@ -12,6 +12,36 @@ class SelectionMethodTests(TestCase):
                 "test@example.com",
                 "p455w0rd"
             ))
+
+class WordTests(NbipTestCase):
+    def setUp(self):
+        self.addUsers()
+
+    def testExplanationCount(self):
+        w = Word(lemma = 'Test', author=self.users[0])
+        w.save()
+        self.assertEqual(w.n_explanations, 0)
+
+        e = Explanation(word = w, explanation = "foo1", author = self.users[1])
+        e.save()
+        self.assertEqual(Word.objects.get().n_explanations, 1)
+
+        e.explanation = "bar"
+        e.save()
+        self.assertEqual(w.n_explanations, 1)
+
+        e2 = Explanation(word = w, explanation = "foo2", author = self.users[2])
+        e2.save()
+        self.assertEqual(w.n_explanations, 2)
+
+        e.delete()
+        self.assertEqual(w.n_explanations, 1)
+
+
+# all the tests related to choosing correct words/explanations
+class SelectionMethodTests(NbipTestCase):
+    def setUp(self):
+        self.addUsers()
 
     def testRandomNoWord(self):
         with self.assertRaises(NotEnoughWordsException):
