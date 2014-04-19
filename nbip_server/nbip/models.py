@@ -77,11 +77,17 @@ class Word(models.Model):
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
     def random(cls, player):
-        words = cls.objects.exclude(author__exact = player.id).all()
+        explained = Explanation.objects.filter(author__exact = player).values("word")
+        guessed = GameRound.objects.filter(player__exact = player).values("word")
+        query = cls.objects \
+            .exclude(author__exact = player.id) \
+            .exclude(id__in  = explained) \
+            .exclude(id__in  = guessed)
 
+        # fetches everything; be smarter if required
+        words = query.all()
         if len(words) < 1:
             raise NotEnoughWordsException()
-
         return random.choice(words)
 
     def __unicode__(self):
@@ -119,8 +125,15 @@ class GameRound(models.Model):
     @classmethod
     @transaction.atomic
     def start_new_round(cls, player):
+        # pick a valid word (not seen before)
         word = Word.random(player=player)
-        expls = word.explanation_set.exclude(author__exact = player.id)
+
+        # pick explanations (not seen before)
+        seen = GameRoundEntry.objects.filter(gameround__player__exact = player).values("explanation")
+        expls = word.explanation_set \
+            .exclude(author__exact = player.id) \
+            .exclude(id__in  = seen)
+
         poss = range(5)
         random.shuffle(poss)
         if len(expls) < 4:

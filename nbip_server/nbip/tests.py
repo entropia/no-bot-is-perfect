@@ -28,6 +28,12 @@ class SelectionMethodTests(TestCase):
         w = Word.random(player=self.users[1])
         self.assertEqual(w,w1)
 
+    def testRandomExplainedWord(self):
+        w1 = Word(lemma = 'Test', author=self.users[0])
+        w1.save()
+        Explanation(word = w1, explanation = "foo1", author = self.users[1]).save()
+        with self.assertRaises(NotEnoughWordsException):
+            Word.random(player=self.users[1])
 
     def testNewRoundNoWord(self):
         with self.assertRaises(NotEnoughWordsException):
@@ -51,9 +57,8 @@ class SelectionMethodTests(TestCase):
         Explanation(word = w1, explanation = "foo2", author = self.users[2]).save()
         Explanation(word = w1, explanation = "foo3", author = self.users[3]).save()
         Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
-        with self.assertRaises(NotEnoughExplanationsException):
+        with self.assertRaises(NotEnoughWordsException):
             round = GameRound.start_new_round(player = self.users[1])
-
 
     def testNewRoundCreation(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
@@ -64,5 +69,16 @@ class SelectionMethodTests(TestCase):
         Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
         round = GameRound.start_new_round(player = self.users[5])
         self.assertEqual(round.word,w1)
+
+    def testNewExplainedWord(self):
+        w1 = Word(lemma = 'Test', author=self.users[0])
+        w1.save()
+        Explanation(word = w1, explanation = "foo1", author = self.users[1]).save()
+        Explanation(word = w1, explanation = "foo2", author = self.users[2]).save()
+        Explanation(word = w1, explanation = "foo3", author = self.users[3]).save()
+        Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
+        Explanation(word = w1, explanation = "foo5", author = self.users[5]).save()
+        with self.assertRaises(NotEnoughWordsException):
+            round = GameRound.start_new_round(player = self.users[1])
 
 
