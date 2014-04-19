@@ -1,0 +1,7 @@
+language: python
+python:
+  - "2.7"
+# command to install dependencies
+install: "pip install -r nbip_server/requirements.txt"
+# command to run tests
+script: cd nbip_server && ./manage.py test -v2
