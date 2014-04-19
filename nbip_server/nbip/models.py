@@ -76,12 +76,13 @@ class Word(models.Model):
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
-    def random(cls):
-        count = cls.objects.all().aggregate(count=Count('id'))['count']
-        if count < 1:
+    def random(cls, player):
+        words = cls.objects.exclude(author__exact = player.id).all()
+
+        if len(words) < 1:
             raise NotEnoughWordsException()
-        random_index = random.randint(0, count - 1)
-        return cls.objects.all()[random_index]
+
+        return random.choice(words)
 
     def __unicode__(self):
         return self.lemma
@@ -118,14 +119,14 @@ class GameRound(models.Model):
     @classmethod
     @transaction.atomic
     def start_new_round(cls, player):
-        word = Word.random()
-        expls = word.explanation_set.all()
-        # TODO: Shuffle:
-        poss = [1,0,4,3,2]
+        word = Word.random(player=player)
+        expls = word.explanation_set.exclude(author__exact = player.id)
+        poss = range(5)
+        random.shuffle(poss)
         if len(expls) < 4:
             raise NotEnoughExplanationsException(word)
         else:
-            expl = expls[0:4]
+            expl = random.sample(expls, 4)
             round = GameRound(
                 word = word,
                 guess = None,
