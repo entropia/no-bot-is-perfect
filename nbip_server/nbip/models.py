@@ -80,18 +80,32 @@ class Word(models.Model):
             verbose_name = "Anzahl Erklärungen",
             default = 0)
 
-    # from http://stackoverflow.com/a/2118712/946226
     @classmethod
-    def random(cls, player):
+    def unseen_objects(cls, player):
         explained = Explanation.objects.filter(author__exact = player).values("word")
         guessed = GameRound.objects.filter(player__exact = player).values("word")
         query = cls.objects \
             .exclude(author__exact = player.id) \
             .exclude(id__in  = explained) \
             .exclude(id__in  = guessed)
+        return query
+
+    # from http://stackoverflow.com/a/2118712/946226
+    @classmethod
+    def random(cls, player):
+        words = cls.unseen_objects(player)
 
         # fetches everything; be smarter if required
-        words = query.all()
+        if len(words) < 1:
+            raise NotEnoughWordsException()
+        return random.choice(words)
+
+    @classmethod
+    # similar to random, but only consider words with enough explanations
+    def random_explained(cls, player):
+        words = cls.unseen_objects(player).filter(n_explanations__gte = 4)
+
+        # fetches everything; be smarter if required
         if len(words) < 1:
             raise NotEnoughWordsException()
         return random.choice(words)
@@ -143,35 +157,36 @@ class GameRound(models.Model):
     @transaction.atomic
     def start_new_round(cls, player):
         # pick a valid word (not seen before)
-        word = Word.random(player=player)
+        word = Word.random_explained(player=player)
 
-        # pick explanations (not seen before)
-        seen = GameRoundEntry.objects.filter(gameround__player__exact = player).values("explanation")
-        expls = word.explanation_set \
-            .exclude(author__exact = player.id) \
-            .exclude(id__in  = seen)
+        # The word has not been seen by the user (not submitted by him, no
+        # explanations created by him, not played before).
+        # In particular, all explanations are not by him, so this check later
+        # is redundant.
+        # Later we might want to exclude this player's bot's explanations.
+        expls = word.explanation_set.all()
+
+        assert len(expls) >= 4, "n_explanations was not up to date?"
+        expl = random.sample(expls, 4)
 
         poss = range(5)
         random.shuffle(poss)
-        if len(expls) < 4:
-            raise NotEnoughExplanationsException(word)
-        else:
-            expl = random.sample(expls, 4)
-            round = GameRound(
-                word = word,
-                guess = None,
+
+        round = GameRound(
+            word = word,
+            guess = None,
+            pos = poss.pop(),
+            player = player,
+            )
+        round.save()
+        for e in expl:
+            GameRoundEntry(
+                gameround = round,
+                explanation = e,
                 pos = poss.pop(),
-                player = player,
-                )
-            round.save()
-            for e in expl:
-                GameRoundEntry(
-                    gameround = round,
-                    explanation = e,
-                    pos = poss.pop(),
-                    guess = None,
-                ).save()
-            return round
+                guess = None,
+            ).save()
+        return round
 
     def get_explanations(self):
         expls = [None,None,None,None,None]
