@@ -3,7 +3,7 @@
 import random
 
 from django.db import models, transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.auth.models import AbstractUser
 
 from django.db.models.signals import post_save, post_delete
@@ -66,41 +66,22 @@ class NbipUser(AbstractUser):
 
     # various stats
     def stats(self):
-        return {
-            'words':  Word.objects.count(),
-            'own_words': Word.objects\
-                .filter(author = self) \
-                .count(),
-            'explained_words': Word.objects \
-                .filter(id__in =
-                    Explanation.objects.filter(author__exact = self).values("word")
-                ) \
-                .count(),
-            'guessed_words': Word.objects \
-                .filter(id__in =
-                    GameRound.objects.filter(player__exact = self).values("word")
-                ) \
-                .count(),
-            'incomplete_words': Word.objects \
-                .exclude(id__in =
-                    Explanation.objects.filter(author__exact = self).values("word")
-                ) \
-                .exclude(id__in =
-                    GameRound.objects.filter(player__exact = self).values("word")
-                ) \
-                .filter(n_explanations__lt = 4)
-                .count(),
-            'usable_words': Word.objects \
-                .exclude(id__in =
-                    Explanation.objects.filter(author__exact = self).values("word")
-                ) \
-                .exclude(id__in =
-                    GameRound.objects.filter(player__exact = self).values("word")
-                ) \
-                .filter(n_explanations__gte = 4)
-                .count(),
+        specs = {
+            'words':
+                Q(),
+            'own_words':
+                Word.q_owner(self),
+            'explained_words':
+                Q(Word.q_explained(self)),
+            'guessed_words':
+                Q(Word.q_guessed(self)),
+            'incomplete_words':
+                Q(Word.q_unseen(self), ~Word.q_complete()),
+            'usable_words':
+                Q(Word.q_unseen(self), Word.q_complete()),
             }
 
+        return {k: Word.objects.filter(q).count() for k, q in specs.iteritems()}
 
 
 # Models
@@ -125,20 +106,33 @@ class Word(models.Model):
             verbose_name = "Anzahl Erklärungen",
             default = 0)
 
+    # query components (Q objects)
     @classmethod
-    def unseen_objects(cls, player):
+    def q_owner(cls, player):
+        return Q(author__exact = player.id)
+
+    @classmethod
+    def q_explained(cls, player):
         explained = Explanation.objects.filter(author__exact = player).values("word")
+        return Q(id__in = explained)
+
+    @classmethod
+    def q_guessed(cls, player):
         guessed = GameRound.objects.filter(player__exact = player).values("word")
-        query = cls.objects \
-            .exclude(author__exact = player.id) \
-            .exclude(id__in  = explained) \
-            .exclude(id__in  = guessed)
-        return query
+        return Q(id__in = guessed)
+
+    @classmethod
+    def q_unseen(cls, player):
+        return Q(~cls.q_owner(player) & ~cls.q_explained(player) & ~cls.q_guessed(player))
+
+    @classmethod
+    def q_complete(cls):
+        return Q(n_explanations__gte = 4)
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
     def random(cls, player):
-        words = cls.unseen_objects(player)
+        words = cls.objects.filter(cls.q_unseen(player))
 
         # fetches everything; be smarter if required
         if len(words) < 1:
@@ -148,7 +142,7 @@ class Word(models.Model):
     @classmethod
     # similar to random, but only consider words with enough explanations
     def random_explained(cls, player):
-        words = cls.unseen_objects(player).filter(n_explanations__gte = 4)
+        words = cls.objects.filter(cls.q_unseen(player), cls.q_complete())
 
         # fetches everything; be smarter if required
         if len(words) < 1:
