@@ -18,6 +18,13 @@ Hallo {{ user }}.
 
 {% block content %}{% endblock %}
 
+<h3>Stats:</h3>
+<ul>
+{% for k, v in user.stats.items %}
+<li>{{k}}: {{v}}</li>
+{% endfor %}
+</ul>
+
 </body>
 </html>
 

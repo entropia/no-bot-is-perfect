@@ -64,7 +64,7 @@ def explain(request):
     else:
         # TODO: Select a word that the user has not seen before
         # (not submitted nor explained nor guessed)
-        word = Word.random()
+        word = Word.random(player = request.user)
         form = ExplainForm(initial = {'word_signed': signer.sign(word.id)})
 
     context = {

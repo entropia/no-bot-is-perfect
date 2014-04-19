@@ -1,13 +1,12 @@
 from django.test import TestCase
 
-from django.contrib.auth.models import User
 from nbip.models import *
 
 class NbipTestCase(TestCase):
     def addUsers(self):
         self.users = []
         for i in range(1,7):
-            self.users.append(User.objects.create_user(
+            self.users.append(NbipUser.objects.create_user(
                 "user%d" % i,
                 "test@example.com",
                 "p455w0rd"
