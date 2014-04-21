@@ -4,7 +4,7 @@ import random
 
 from django.db import models, transaction
 from django.db.models import Count, Q
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -59,13 +59,10 @@ class NotEnoughExplanationsException(Exception):
     pass
 
 
-# Proxy class to add functionaliy.
-# Do not add new fields here!
-# (see https://docs.djangoproject.com/en/1.6/topics/auth/customizing/#extending-the-existing-user-model)
-class NbipUser(AbstractUser):
 
-    # various stats
-    def stats(self):
+
+# various stats
+def _get_stats(self):
         specs = {
             'words':
                 Q(),
@@ -82,7 +79,9 @@ class NbipUser(AbstractUser):
             }
 
         return {k: Word.objects.filter(q).count() for k, q in specs.iteritems()}
-
+# HACK! How to do this cleanly
+# (in a way so that the "user" in template's context supports this)
+User.stats = _get_stats
 
 # Models
 
@@ -100,7 +99,7 @@ class Word(models.Model):
             help_text = u"URL zu Wikipedia o.ä.")
 
     created = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(NbipUser, verbose_name="Autor")
+    author = models.ForeignKey(User, verbose_name="Autor")
 
     n_explanations = models.PositiveIntegerField(
             verbose_name = "Anzahl Erklärungen",
@@ -165,7 +164,7 @@ class Explanation(models.Model):
     explanation = models.CharField(max_length=1000,
             verbose_name= u"Erklärung",
             help_text= u"<i>Wort</i> ist ein/eine <i>Erklärung</i>")
-    author = models.ForeignKey(NbipUser, verbose_name="Autor")
+    author = models.ForeignKey(User, verbose_name="Autor")
 
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
@@ -187,7 +186,7 @@ class GameRound(models.Model):
     pos = models.PositiveSmallIntegerField()
     # What the user guessed for the correct result
     guess = GuessField()
-    player = models.ForeignKey(NbipUser, verbose_name="Spieler")
+    player = models.ForeignKey(User, verbose_name="Spieler")
 
     def __unicode__(self):
         return "%s (%d)" % (self.word.lemma, self.id)

@@ -6,7 +6,7 @@ class NbipTestCase(TestCase):
     def addUsers(self):
         self.users = []
         for i in range(1,7):
-            self.users.append(NbipUser.objects.create_user(
+            self.users.append(User.objects.create_user(
                 "user%d" % i,
                 "test@example.com",
                 "p455w0rd"
@@ -31,10 +31,10 @@ class WordTests(NbipTestCase):
 
         e2 = Explanation(word = w, explanation = "foo2", author = self.users[2])
         e2.save()
-        self.assertEqual(w.n_explanations, 2)
+        self.assertEqual(Word.objects.get().n_explanations, 2)
 
         e.delete()
-        self.assertEqual(w.n_explanations, 1)
+        self.assertEqual(Word.objects.get().n_explanations, 1)
 
 
 # all the tests related to choosing correct words/explanations
