@@ -85,6 +85,15 @@ User.stats = _get_stats
 
 # Models
 
+class Bot(models.Model):
+    class Meta:
+        verbose_name = "Bot"
+        verbose_name_plural = u"Bots"
+
+    owner = models.ForeignKey(User, verbose_name="Benutzer")
+    name = models.CharField(max_length=200, verbose_name="Bot-Name")
+
+
 class Word(models.Model):
     class Meta:
         verbose_name = "Wort"
@@ -164,7 +173,23 @@ class Explanation(models.Model):
     explanation = models.CharField(max_length=1000,
             verbose_name= u"Erklärung",
             help_text= u"<i>Wort</i> ist ein/eine <i>Erklärung</i>")
-    author = models.ForeignKey(User, verbose_name="Autor")
+
+    # exactly one of these should be not null
+    author = models.ForeignKey(User, verbose_name="Autor", blank=True, null=True)
+    bot = models.ForeignKey(Bot, verbose_name="Bot", blank=True, null=True)
+
+    def clean(self):
+        if self.author is None and self.bot is None:
+            raise ValidationError('Autor oder Bot müssen gesetzt sein.')
+        if self.author is not None and self.bot is not None:
+            raise ValidationError('Autor und Bot dürfen nicht beide gesetzt sein.')
+
+    def type(self):
+        '''HUMAN or COMPUTER'''
+        if self.author is not None:
+            return HUMAN
+        else:
+            return COMPUTER
 
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
@@ -246,17 +271,24 @@ class GameRound(models.Model):
     def set_guesses(self, guesses):
         # TODO: These assertions should be enforced by the client code (JS)
         assert self.guess is None
-        assert len(guesses) == 5
-        for g in guesses:
-            assert len(guesses) == 5
 
-        assert guesses.count(CORRECT) == 1, "Not exactly one answer 'correct'"
-        assert guesses.count(HUMAN) == 2, "Not exactly two answers 'human'"
-        assert guesses.count(COMPUTER) == 2, "Not exactly two answers 'computer'"
+        entries = GameRoundEntry.objects.filter(gameround=self)
+
+        required = [CORRECT] + [e.explanation.type() for e in entries]
+
+        assert len(guesses) == len(required), \
+            "Wrong number of answers"
+
+        assert guesses.count(CORRECT) == required.count(CORRECT), \
+            "Wrong number of answers 'correct'"
+        assert guesses.count(HUMAN) == required.count(HUMAN), \
+            "Wrong number of answers 'human'"
+        assert guesses.count(COMPUTER) == required.count(COMPUTER), \
+            "Wrong number of answers 'computer'"
 
         self.guess = guesses[self.pos]
-        for e in GameRoundEntry.objects.filter(gameround=self):
-            assert e.pos < 5
+        for e in entries:
+            assert e.pos < len(guesses)
             e.guess = guesses[e.pos]
             e.save()
         self.save()
