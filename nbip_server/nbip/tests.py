@@ -11,30 +11,59 @@ class NbipTestCase(TestCase):
                 "test@example.com",
                 "p455w0rd"
             ))
+        for i in range(len(self.users)):
+            Bot(owner = self.users[i], name = "bot%d" % i).save()
+
+    # convenience functions
+    def addHumanExplanation(self, word, n):
+        e = Explanation(word = word, explanation = "foo1", author = self.users[n])
+        e.save()
+        return e
+
+    def addBotExplanation(self, word, n):
+        e = Explanation(word = word, explanation = "foo1", bot = self.users[n].bots.get())
+        e.save()
+        return e
 
 class WordTests(NbipTestCase):
     def setUp(self):
         self.addUsers()
 
-    def testExplanationCount(self):
+    def testHumanExplanationCount(self):
         w = Word(lemma = 'Test', author=self.users[0])
         w.save()
-        self.assertEqual(w.n_explanations, 0)
+        self.assertEqual(w.n_human_explanations, 0)
 
-        e = Explanation(word = w, explanation = "foo1", author = self.users[1])
-        e.save()
-        self.assertEqual(Word.objects.get().n_explanations, 1)
+        e = self.addHumanExplanation(w,1)
+        self.assertEqual(Word.objects.get().n_human_explanations, 1)
 
         e.explanation = "bar"
         e.save()
-        self.assertEqual(w.n_explanations, 1)
+        self.assertEqual(Word.objects.get().n_human_explanations, 1)
 
-        e2 = Explanation(word = w, explanation = "foo2", author = self.users[2])
-        e2.save()
-        self.assertEqual(Word.objects.get().n_explanations, 2)
+        self.addHumanExplanation(w,2)
+        self.assertEqual(Word.objects.get().n_human_explanations, 2)
 
         e.delete()
-        self.assertEqual(Word.objects.get().n_explanations, 1)
+        self.assertEqual(Word.objects.get().n_human_explanations, 1)
+
+    def testBotExplanationCount(self):
+        w = Word(lemma = 'Test', author=self.users[0])
+        w.save()
+        self.assertEqual(w.n_human_explanations, 0)
+
+        e = self.addBotExplanation(w,1)
+        self.assertEqual(Word.objects.get().n_bot_explanations, 1)
+
+        e.explanation = "bar"
+        e.save()
+        self.assertEqual(Word.objects.get().n_bot_explanations, 1)
+
+        self.addBotExplanation(w,2)
+        self.assertEqual(Word.objects.get().n_bot_explanations, 2)
+
+        e.delete()
+        self.assertEqual(Word.objects.get().n_bot_explanations, 1)
 
 
 # all the tests related to choosing correct words/explanations
@@ -82,20 +111,20 @@ class SelectionMethodTests(NbipTestCase):
     def testNewRoundOwnExplanations(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
         w1.save()
-        Explanation(word = w1, explanation = "foo1", author = self.users[1]).save()
-        Explanation(word = w1, explanation = "foo2", author = self.users[2]).save()
-        Explanation(word = w1, explanation = "foo3", author = self.users[3]).save()
-        Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
+        self.addHumanExplanation(w1,1)
+        self.addHumanExplanation(w1,2)
+        self.addBotExplanation(w1,1)
+        self.addBotExplanation(w1,2)
         with self.assertRaises(NotEnoughWordsException):
             round = GameRound.start_new_round(player = self.users[1])
 
     def testNewRoundCreation(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
         w1.save()
-        Explanation(word = w1, explanation = "foo1", author = self.users[1]).save()
-        Explanation(word = w1, explanation = "foo2", author = self.users[2]).save()
-        Explanation(word = w1, explanation = "foo3", author = self.users[3]).save()
-        Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
+        self.addHumanExplanation(w1,1)
+        self.addHumanExplanation(w1,2)
+        self.addBotExplanation(w1,1)
+        self.addBotExplanation(w1,2)
         round = GameRound.start_new_round(player = self.users[5])
         self.assertEqual(round.word,w1)
 
@@ -104,10 +133,10 @@ class SelectionMethodTests(NbipTestCase):
         w1.save()
         w2 = Word(lemma = 'Test', author=self.users[2])
         w2.save()
-        Explanation(word = w2, explanation = "foo1", author = self.users[1]).save()
-        Explanation(word = w2, explanation = "foo2", author = self.users[2]).save()
-        Explanation(word = w2, explanation = "foo3", author = self.users[3]).save()
-        Explanation(word = w2, explanation = "foo4", author = self.users[4]).save()
+        self.addHumanExplanation(w2,1)
+        self.addHumanExplanation(w2,2)
+        self.addBotExplanation(w2,1)
+        self.addBotExplanation(w2,2)
         round = GameRound.start_new_round(player = self.users[5])
         self.assertEqual(round.word,w2)
 
@@ -115,11 +144,11 @@ class SelectionMethodTests(NbipTestCase):
     def testNewExplainedWord(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
         w1.save()
-        Explanation(word = w1, explanation = "foo1", author = self.users[1]).save()
-        Explanation(word = w1, explanation = "foo2", author = self.users[2]).save()
-        Explanation(word = w1, explanation = "foo3", author = self.users[3]).save()
-        Explanation(word = w1, explanation = "foo4", author = self.users[4]).save()
-        Explanation(word = w1, explanation = "foo5", author = self.users[5]).save()
+        self.addHumanExplanation(w1,1)
+        self.addHumanExplanation(w1,2)
+        self.addBotExplanation(w1,1)
+        self.addBotExplanation(w1,2)
+        self.addHumanExplanation(w1,5)
         with self.assertRaises(NotEnoughWordsException):
             round = GameRound.start_new_round(player = self.users[1])
 

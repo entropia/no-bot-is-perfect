@@ -90,7 +90,7 @@ class Bot(models.Model):
         verbose_name = "Bot"
         verbose_name_plural = u"Bots"
 
-    owner = models.ForeignKey(User, verbose_name="Benutzer")
+    owner = models.ForeignKey(User, verbose_name="Benutzer", related_name = "bots")
     name = models.CharField(max_length=200, verbose_name="Bot-Name")
 
 
@@ -110,8 +110,11 @@ class Word(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, verbose_name="Autor")
 
-    n_explanations = models.PositiveIntegerField(
-            verbose_name = "Anzahl Erklärungen",
+    n_human_explanations = models.PositiveIntegerField(
+            verbose_name = "Anzahl menschliche Erklärungen",
+            default = 0)
+    n_bot_explanations = models.PositiveIntegerField(
+            verbose_name = "Anzahl Computer-Erklärungen",
             default = 0)
 
     # query components (Q objects)
@@ -135,7 +138,7 @@ class Word(models.Model):
 
     @classmethod
     def q_complete(cls):
-        return Q(n_explanations__gte = 4)
+        return Q(n_human_explanations__gte = 2) & Q(n_bot_explanations__gte = 2)
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
@@ -158,7 +161,10 @@ class Word(models.Model):
         return random.choice(words)
 
     def update_cached_fields(self):
-        self.n_explanations = Explanation.objects.filter(word__exact = self.id).count()
+        self.n_human_explanations = \
+            Explanation.objects.filter(author__isnull = False, word__exact = self.id).count()
+        self.n_bot_explanations = \
+            Explanation.objects.filter(bot__isnull = False, word__exact = self.id).count()
         self.save()
 
     def __unicode__(self):
@@ -194,7 +200,7 @@ class Explanation(models.Model):
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
 
-# Keep Word.n_explanations up-to-date
+# Keep Word.n_*_explanations up-to-date
 @receiver(post_save, sender=Explanation)
 @receiver(post_delete, sender=Explanation)
 def update_word(sender, instance, **kwargs):
@@ -227,10 +233,12 @@ class GameRound(models.Model):
         # In particular, all explanations are not by him, so this check later
         # is redundant.
         # Later we might want to exclude this player's bot's explanations.
-        expls = word.explanation_set.all()
+        human_expls = word.explanation_set.filter(author__isnull = False)
+        bot_expls = word.explanation_set.filter(bot__isnull = False)
 
-        assert len(expls) >= 4, "n_explanations was not up to date?"
-        expl = random.sample(expls, 4)
+        assert len(human_expls) >= 2, "n_human_explanations was not up to date?"
+        assert len(bot_expls) >= 2, "n_bot_explanations was not up to date?"
+        expl = random.sample(human_expls, 2) + random.sample(bot_expls, 2)
 
         poss = range(5)
         random.shuffle(poss)
