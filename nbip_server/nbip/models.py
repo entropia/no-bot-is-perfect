@@ -13,14 +13,22 @@ from django.dispatch import receiver
 # Enumeration type
 class Guess(int):
     def __init__(self, value):
-        assert 0 <= value < 3, "value %s out of range" % value
+        if value is None:
+            self=None
+        else:
+            value=int(value)
+            assert 0 <= value < 3, "value %s out of range" % value
+            self=value
 
-    def __unicode__(self):
-        return {
-            0: 'Richtig',
-            1: 'Mensch',
-            2: 'Computer',
-        }[self]
+    # Breaks the admin form
+    #def __unicode__(self):
+    #    return {
+    #        0: 'Richtig',
+    #        1: 'Mensch',
+    #        2: 'Computer',
+    #    }[int(self)]
+
+
 
 # Constants
 CORRECT = Guess(0)
@@ -34,9 +42,10 @@ class GuessField(models.PositiveSmallIntegerField):
     __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
-        kwargs['choices'] = [ (0, 'Richtig')
-           , (1, 'Mensch')
-           , (2, 'Computer')
+        kwargs['choices'] = [
+             (CORRECT, 'Richtig')
+           , (HUMAN, 'Mensch')
+           , (COMPUTER, 'Computer')
            ]
         kwargs['null'] = True
         super(GuessField, self).__init__(*args, **kwargs)
@@ -49,6 +58,11 @@ class GuessField(models.PositiveSmallIntegerField):
             return value
 
         return Guess(value)
+
+    def formfield(self, **kwargs):
+        defaults = {'coerce': lambda x: Guess(x)}
+        defaults.update(kwargs)
+        return super(GuessField, self).formfield(**defaults)
 
 # Exceptions
 
@@ -93,6 +107,8 @@ class Bot(models.Model):
     owner = models.ForeignKey(User, verbose_name="Benutzer", related_name = "bots")
     name = models.CharField(max_length=200, verbose_name="Bot-Name")
 
+    def __unicode__(self):
+        return "%s by %s" % (self.name, self.owner)
 
 class Word(models.Model):
     class Meta:
@@ -108,7 +124,7 @@ class Word(models.Model):
             help_text = u"URL zu Wikipedia o.ä.")
 
     created = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, verbose_name="Autor")
+    author = models.ForeignKey(User, verbose_name="Autor", related_name="submitted_words")
 
     n_human_explanations = models.PositiveIntegerField(
             verbose_name = "Anzahl menschliche Erklärungen",
