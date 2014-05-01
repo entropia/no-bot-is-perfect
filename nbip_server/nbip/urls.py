@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url(r'^guess/$', views.new_guess, name='new_guess'),
     url(r'^guess/(\d+)/$', views.guess, name='guess'),
     url(r'^view_guess/(\d+)/$', views.view_guess, name='view_guess'),
+    url(r'^stats/$', views.stats, name='stats'),
 )

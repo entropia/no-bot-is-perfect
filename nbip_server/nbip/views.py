@@ -133,4 +133,8 @@ def highscore(request):
             .annotate(games_played = Count('gameround'))
     print scores.query
 
-    
+@login_required()
+def stats(request):
+    context = {
+    }
+    return render(request, 'nbip/stats.html', context)

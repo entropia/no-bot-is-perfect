@@ -1,0 +1,19 @@
+{% extends "nbip/base.html" %}
+
+{% block title %}Statistiken{% endblock %}
+
+{% block content %}
+<div class="container">
+<h2>Statistiken <small>für {{user}}</small></h2>
+<ul>
+{% for k, v in user.stats.items %}
+<li>{{k}}: {{v}}</li>
+{% endfor %}
+</ul>
+</div>
+
+<div class="container">
+<h2>Sonstiges</h2>
+<a href="{% url 'logout' %}">Abmelden</a>
+</div>
+{% endblock %}

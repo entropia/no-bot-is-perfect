@@ -59,8 +59,8 @@
  
 {% if user.is_authenticated %}
 <div class="navbar-right">
-<p class="navbar-text">Hallo {{user}}!</p>
-<a href="{% url 'logout' %}" class="btn navbar-btn">Abmelden</a>
+<p class="navbar-text">Hallo 
+<a href="{% url 'stats' %}" class="navbar-link">{{user}}</a>!</p>
 </div>
 {% else %}
 <a href="{% url 'login' %}" class="navbar-right btn navbar-btn">Einloggen</a>
@@ -81,15 +81,6 @@
 {# <h1>{% block title %}{% endblock %}</h1> #}
 
 {% block content %}{% endblock %}
-
-<div class="container">
-<h3>Stats:</h3>
-<ul>
-{% for k, v in user.stats.items %}
-<li>{{k}}: {{v}}</li>
-{% endfor %}
-</ul>
-</div>
 
 </body>
 </html>
