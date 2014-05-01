@@ -120,7 +120,7 @@ class Word(models.Model):
             verbose_name = "Korrekte Erklärung",
             help_text= u"<i>Wort</i> ist ein/eine <i>Erklärung</i>")
     reference = models.URLField(blank=True,
-            verbose_name = "Reference",
+            verbose_name = "Referenz",
             help_text = u"URL zu Wikipedia o.ä.")
 
     created = models.DateTimeField(auto_now_add=True)

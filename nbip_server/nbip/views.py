@@ -125,3 +125,12 @@ def view_guess(request, round_id):
         'explanations': expls,
         }
     return render(request, 'nbip/view_guess.html', context)
+
+def highscore(request):
+    scores = User.objects \
+            .annotate(submitted_words = Count('word')) \
+            .annotate(submitted_explanations = Count('explanation')) \
+            .annotate(games_played = Count('gameround'))
+    print scores.query
+
+    
