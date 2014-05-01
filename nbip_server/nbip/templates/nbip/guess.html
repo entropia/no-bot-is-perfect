@@ -3,23 +3,33 @@
 {% block title %}Was ist richtig?{% endblock %}
 
 {% block content %}
-<h1>No bot is perfect</h1>
-<p>Was mag denn ein {{ word.lemma }} sein?</p>
-<form action="" method="post">
+<div class="container">
+<p>Was mag denn ein <strong>{{ word.lemma }}</strong> sein?</p>
+
+<form class="form-horizontal" role="form" method="POST">
 {% csrf_token %}
-<ul>
+
 {% for e in explanations %}
-<li>
-<label for="guess{{forloop.counter0}}">{{ e.text }}</label> <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
-<option value=""></option>
-<option value="0">Richtig</option>
-<option value="1">Mensch</option>
-<option value="2">Computer</option>
-</li>
-</select>
+<div class="form-group">
+ <label for="guess{{forloop.counter0}}" class="col-sm-4 control-label">{{ e.text }}</label>
+ <div class="col-sm-2">
+  <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
+   <option value=""></option>
+   <option value="0">Richtig</option>
+   <option value="1">Mensch</option>
+   <option value="2">Computer</option>
+  </select>
+ </div>
+</div>
 {% endfor %}
-</ul>
-<input type="submit" value="Submit" />
+
+<div class="form-group">
+ <div class="col-sm-offset-4 col-sm-2">
+  <input  class="btn btn-default" type="submit" value="Submit" />
+ </div>
+</div>
+
 </form>
+</div>
 
 {% endblock %}

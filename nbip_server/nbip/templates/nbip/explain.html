@@ -1,14 +1,24 @@
 {% extends "nbip/base.html" %}
+{% load bootstrap %}
 
 {% block title %}Neues Wort einreichen{% endblock %}
 
 {% block content %}
-<h1>No bot is perfect</h1>
-<p>Was könnte denn ein {{ word.lemma }} sein?</p>
-<form action="" method="post">
+<div class="container">
+<p>Was könnte denn ein <strong>{{ word.lemma }}</strong> sein?</p>
+
+<form class="form-horizontal" role="form" method="POST">
 {% csrf_token %}
-{{ form.as_p }}
-<input type="submit" value="Submit" />
+
+{{ form|bootstrap_horizontal }}
+
+<div class="form-group">
+ <div class="col-sm-offset-2 col-sm-2">
+  <input  class="btn btn-default" type="submit" value="Submit" />
+ </div>
+</div>
+
 </form>
+</div>
 
 {% endblock %}
