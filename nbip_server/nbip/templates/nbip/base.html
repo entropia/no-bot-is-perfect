@@ -1,7 +1,20 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <title>No bot is perfect – {% block title %}{% endblock %}</title>
+<style type="text/css">
+/*
+ Have the icon have no influence on the navigation height.
+ http://stackoverflow.com/a/11818212/946226 
+ */
+.navbar .navbar-brand.logo {
+    max-height: 1px;
+    overflow: visible;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+</style>
 
 <!-- Bootstrap -->
 <meta charset="utf-8">
@@ -18,7 +31,12 @@
 
 <nav class="navbar navbar-default navbar-static-top" role="navigation">
 <div class="container">
-<a class="navbar-brand" href="{% url 'index' %}">No bot is perfect</a>
+<a class="navbar-brand logo" href="{% url 'index' %}">
+  <img src="{% static "Maria-50.png" %}" alt="Logo"/>
+</a>
+<a class="navbar-brand" href="{% url 'index' %}">
+  No bot is perfect
+</a>
 <ul class="nav navbar-nav">
 <li><a href="{% url 'submit' %}">Neues Wort</a></li>
 <li><a href="{% url 'explain' %}">Wort erklären</a></li>
