@@ -62,10 +62,13 @@ def explain(request):
             messages.success(request, u"Vielen Dank für Deine Erklärung zu „%s“!" % word.lemma)
             return redirect('index')
     else:
-        # TODO: Select a word that the user has not seen before
-        # (not submitted nor explained nor guessed)
-        word = Word.random(player = request.user)
-        form = ExplainForm(initial = {'word_signed': signer.sign(word.id)})
+        try:
+            word = Word.random(player = request.user)
+            form = ExplainForm(initial = {'word_signed': signer.sign(word.id)})
+        except NotEnoughWordsException:
+            messages.error(request, u"Leider gibt es nicht genügend Wörter. Motiviere deine Freunde, ein paar neue Wörter einzugeben!")
+            return redirect('index')
+
 
     context = {
         'word': word,
@@ -83,7 +86,11 @@ def new_guess(request):
         round = running_rounds[0]
         return redirect('guess', round.pk)
     else:
-        round = GameRound.start_new_round(player = request.user)
+        try:
+            round = GameRound.start_new_round(player = request.user)
+        except NotEnoughWordsException:
+            messages.error(request, u"Leider gibt es nicht genügend Wörter. Motiviere deine Freunde, ein paar neue Wörter einzugeben und Erklärungen zu erfinden!")
+            return redirect('index')
         return redirect('guess', round.pk)
 
 def guess(request, round_id):
