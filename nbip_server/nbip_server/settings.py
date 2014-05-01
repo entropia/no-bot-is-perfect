@@ -68,12 +68,36 @@ WSGI_APPLICATION = 'nbip_server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+DATABASES = {}
+if 'OPENSHIFT_MYSQL_DB_URL' in os.environ:
+    import urlparse
+    url = urlparse.urlparse(os.environ.get('OPENSHIFT_MYSQL_DB_URL'))
+
+    DATABASES['default'] = {
+        'ENGINE' : 'django.db.backends.mysql',
+        'NAME': os.environ['OPENSHIFT_APP_NAME'],
+        'USER': url.username,
+        'PASSWORD': url.password,
+        'HOST': url.hostname,
+        'PORT': url.port,
+        }
+elif 'OPENSHIFT_POSTGRESQL_DB_URL' in os.environ:
+    import urlparse
+    url = urlparse.urlparse(os.environ.get('OPENSHIFT_POSTGRESQL_DB_URL'))
+
+    DATABASES['default'] = {
+        'ENGINE' : 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ['OPENSHIFT_APP_NAME'],
+        'USER': url.username,
+        'PASSWORD': url.password,
+        'HOST': url.hostname,
+        'PORT': url.port,
+        }
+else:
+    DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+        }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
@@ -93,6 +117,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+if 'OPENSHIFT_REPO_DIR' in os.environ:
+    STATIC_ROOT = os.path.join(os.environ.get('OPENSHIFT_REPO_DIR'), 'wsgi', 'static')
 
 # https://coderwall.com/p/wekglq
 from django.contrib.messages import constants as messages

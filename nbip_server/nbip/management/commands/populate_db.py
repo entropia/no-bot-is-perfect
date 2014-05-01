@@ -25,6 +25,7 @@ class Command(BaseCommand):
         admin.is_active = True
         admin.is_superuser = True
         admin.save()
+        print "Admin user (admin / admin) created."
 
 
         # users
@@ -37,6 +38,7 @@ class Command(BaseCommand):
             ))
         for i in range(len(users)):
             Bot(owner = users[i], name = "bot%d" % i).save()
+        print "Dummy users created"
 
         # a word
         w1 = Word(lemma = 'Tentillum',
@@ -49,6 +51,7 @@ class Command(BaseCommand):
         Explanation(word = w1, explanation = "längliche Nudelform", author = users[1]).save()
         Explanation(word = w1, explanation = "britischer Wahlkreis", bot = users[2].bots.get()).save()
         Explanation(word = w1, explanation = "magischer Charakter", bot = users[3].bots.get()).save()
+        print "Example data created"
 
     def handle(self, *args, **options):
         self._load_data()
