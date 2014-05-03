@@ -20,18 +20,14 @@ function update_submit () {
 	});
 
 	$(":submit").attr("disabled", false);
+	$(":submit").show();
 	actual.map(function(_,i) {
 		if (actual[i] != counts[i]) {
 			$(":submit").attr("disabled", true);
+			$(":submit").hide();
 		}
 	});
 }
-
-$(function (){
-	update_submit();
-	$("select").on('change', update_submit);
-});
-
 
 // Drag'n'drop functionality
 function update_form (){
@@ -96,6 +92,10 @@ $(function (){
 	});
 });
 
+$(function (){
+	update_form();
+	$("select").on('change', update_submit);
+});
 
 {% endblock %}
 
@@ -111,7 +111,7 @@ $(function (){
 {% endfor %}
 
 {% for e in explanations %}
-<div class="form-group">
+<div class="form-group" style="display: none">
  <label for="guess{{forloop.counter0}}" class="col-sm-4 control-label">{{ e.text }}</label>
  <div class="col-sm-2">
   <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
@@ -134,19 +134,21 @@ $(function (){
      </div>
     </div>
    {% endfor %}
-   <div class="col-sm-4" id="answer-icons">
+   <div class="col-sm-4">
+    <div id="answer-icons">
      {% for answer, count in counts.items %}
       {% for i in count|countup %}
        <img class="answer-icon" src="{% static "icon-" %}{{answer}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
       {% endfor %}
      {% endfor %}
+    </div>
+    <input  class="btn btn-default" type="submit" value="Fertig!"/>
    </div>
   </div>
 </div>
 
 
 <div class="form-group">
-  <input  class="btn btn-default" type="submit" value="Submit" />
 </div>
 
 </form>
