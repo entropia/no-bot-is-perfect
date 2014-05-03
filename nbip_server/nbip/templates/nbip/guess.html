@@ -34,27 +34,60 @@ $(function (){
 
 
 // Drag'n'drop functionality
+function update_form (){
+	var selects = $("select");
+	var answers = $(".answer-panel");
+	answers.each(function (i,a){
+		var icon = $(a).find(".answer-icon");
+		if (icon.length) {
+			$(selects.get(i)).val(icon.data('answer'));
+		} else {
+			$(selects.get(i)).val('');
+		}
+	});
+	update_submit();
+}
+
 $(function (){
 	$(".answer-icon").draggable({
 		revert: true,
+		zIndex: 100 ,
 	});
 	$(".answer-panel").droppable({
 		accept: '.answer-icon',
 		hoverClass: "panel-success",
 		drop: function( event, ui ) {
-			$(this).find(".answer-icon").appendTo("#answer-icons");
+			// find out what icons to remove here
+			var to_remove = $(this).find(".answer-icon");
 
+			// move the dragged icon here (smoothly)
+			var pos_now = ui.draggable.offset();
 			ui.draggable.css({position: "relative", top:"", left:""});
-			//ui.draggable.css('position', '');
-			//ui.draggable.css('top', ui.position.top - $(this).position().top);
-			//ui.draggable.css('left', ui.position.left - $(this).position().left);
-
 			$(this).prepend(ui.draggable);
+			var pos_target = ui.draggable.offset();
 
+			ui.draggable.css('position', 'relative');
+			ui.draggable.css('top', pos_now.top - pos_target.top);
+			ui.draggable.css('left', pos_now.left - pos_target.left);
+
+			// more the existing icons away (smoothly)
+			to_remove.each(function (n,e) {
+				var e_pos_now = $(e).offset();
+				$(e).appendTo("#answer-icons");
+				var e_pos_target = $(e).offset();
+
+				$(e).css('position', 'relative');
+				$(e).css('top', e_pos_now.top - e_pos_target.top);
+				$(e).css('left', e_pos_now.left - e_pos_target.left);
+				$(e).animate({left: 0, top: 0});
+			});
 
 			// Show placeholders only where relevant
 			$(".answer-placeholder").show();
 			$(".answer-panel").has(".answer-icon").find(".answer-placeholder").hide();
+
+			// Finally: Update form
+			update_form();
 		},
 	});
 });
@@ -109,9 +142,7 @@ $(function (){
 
 
 <div class="form-group">
- <div class="col-sm-offset-4 col-sm-2">
   <input  class="btn btn-default" type="submit" value="Submit" />
- </div>
 </div>
 
 </form>
