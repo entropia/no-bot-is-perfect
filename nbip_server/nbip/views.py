@@ -98,6 +98,7 @@ def guess(request, round_id):
     if round.guess is not None:
         return redirect('view_guess', round.pk)
     expls = round.get_explanations()
+    counts = round.get_counts()
 
     # TODO: Check permissions
     if request.method == 'POST':
@@ -111,6 +112,7 @@ def guess(request, round_id):
     context = {
         'word': round.word,
         'explanations': expls,
+        'counts': counts,
         }
     return render(request, 'nbip/guess.html', context)
 

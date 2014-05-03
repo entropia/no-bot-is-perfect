@@ -2,12 +2,47 @@
 
 {% block title %}Was ist richtig?{% endblock %}
 
+{% block page-js %}
+// Grey out the submit button if the answers do not make sense
+function update_submit () {
+	var counts = [0,0,0];
+	$(".result-count").each(function (_,input) {
+		var n = $(input).attr('name').substr(6);
+		counts[n] = $(input).val();
+	});
+
+	var actual = [0,0,0];
+	$("select").each(function (_,select) {
+		var n = $(select).val();
+		if (n) {actual[n]++};
+	});
+
+	$(":submit").attr("disabled", false);
+	actual.map(function(_,i) {
+		if (actual[i] != counts[i]) {
+			$(":submit").attr("disabled", true);
+		}
+	});
+}
+
+$(function (){
+	update_submit();
+	$("select").on('change', update_submit);
+});
+
+
+{% endblock %}
+
 {% block content %}
 <div class="container">
 <p>Was mag denn ein <strong>{{ word.lemma }}</strong> sein?</p>
 
 <form class="form-horizontal" role="form" method="POST">
 {% csrf_token %}
+
+{% for k, v in counts.items %}
+<input type="hidden" class="result-count" name="count-{{k}}" value="{{v}}" />
+{% endfor %}
 
 {% for e in explanations %}
 <div class="form-group">

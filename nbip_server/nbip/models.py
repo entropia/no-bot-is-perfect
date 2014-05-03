@@ -286,9 +286,19 @@ class GameRound(models.Model):
             expls[e.pos] = {
                     'text': e.explanation.explanation,
                     'guess': e.guess,
-                    'actual': HUMAN, # TODO: COMPUTER
+                    'actual': e.explanation.type(),
             }
         return expls
+
+    def get_counts(self):
+        counts = {
+            CORRECT: 1,
+            HUMAN: 0,
+            COMPUTER: 0,
+            }
+        for e in GameRoundEntry.objects.filter(gameround=self):
+            counts[e.explanation.type()] += 1
+        return counts
 
 
     @transaction.atomic

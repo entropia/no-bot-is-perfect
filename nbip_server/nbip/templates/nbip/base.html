@@ -26,6 +26,10 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 
+<script type="text/javascript">
+{% block page-js %}{% endblock %}
+</script>
+
 </head>
 
 <body>
@@ -54,7 +58,7 @@
 <ul class="nav navbar-nav">
 <li class="{% current 'submit' return_value='active' %}"><a href="{% url 'submit' %}">Neues Wort</a></li>
 <li class="{% current 'explain' return_value='active' %}"><a href="{% url 'explain' %}">Erklären</a></li>
-<li class="{% current 'new_guess' return_value='active' %} {% current 'guess' return_value='active' %}""><a href="{% url 'new_guess' %}">Raten</a></li>
+<li class="{% current 'new_guess' return_value='active' %} {% current 'guess' return_value='active' %}"><a href="{% url 'new_guess' %}">Raten</a></li>
 </ul>
  
 {% if user.is_authenticated %}
