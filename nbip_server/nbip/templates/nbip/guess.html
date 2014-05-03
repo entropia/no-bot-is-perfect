@@ -57,23 +57,25 @@ $(function (){
 		accept: '.answer-icon',
 		hoverClass: "panel-success",
 		drop: function( event, ui ) {
-			// find out what icons to remove here
-			var to_remove = $(this).find(".answer-icon");
+			// store current positions for all icons
+			$(".answer-icon").each(function (i,e) {
+				$(e).data('pos_now', $(e).offset());
+			});
 
-			// move the dragged icon here (smoothly)
-			var pos_now = ui.draggable.offset();
+
+			// move existing icons back to the store
+			$(this).find(".answer-icon").appendTo("#answer-icons");
+
+			// move draggable here
 			ui.draggable.css({position: "relative", top:"", left:""});
 			$(this).prepend(ui.draggable);
-			var pos_target = ui.draggable.offset();
 
-			ui.draggable.css('position', 'relative');
-			ui.draggable.css('top', pos_now.top - pos_target.top);
-			ui.draggable.css('left', pos_now.left - pos_target.left);
-
-			// more the existing icons away (smoothly)
-			to_remove.each(function (n,e) {
-				var e_pos_now = $(e).offset();
-				$(e).appendTo("#answer-icons");
+			// Show placeholders only where relevant
+			$(".answer-placeholder").show();
+			$(".answer-panel").has(".answer-icon").find(".answer-placeholder").hide();
+			// animate all motion
+			$(".answer-icon").each(function (n,e) {
+				var e_pos_now = $(e).data('pos_now');
 				var e_pos_target = $(e).offset();
 
 				$(e).css('position', 'relative');
@@ -81,10 +83,6 @@ $(function (){
 				$(e).css('left', e_pos_now.left - e_pos_target.left);
 				$(e).animate({left: 0, top: 0});
 			});
-
-			// Show placeholders only where relevant
-			$(".answer-placeholder").show();
-			$(".answer-panel").has(".answer-icon").find(".answer-placeholder").hide();
 
 			// Finally: Update form
 			update_form();
