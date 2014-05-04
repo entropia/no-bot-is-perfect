@@ -103,7 +103,7 @@ def guess(request, round_id):
     # TODO: Check permissions
     if request.method == 'POST':
         guesses = []
-        for n in range(5):
+        for n in range(len(expls)):
             guesses.append(int(request.POST['guess%d' % n]))
 
         round.set_guesses(guesses)

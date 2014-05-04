@@ -5,6 +5,7 @@ import random
 from django.db import models, transaction
 from django.db.models import Count, Q
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
@@ -154,7 +155,8 @@ class Word(models.Model):
 
     @classmethod
     def q_complete(cls):
-        return Q(n_human_explanations__gte = 2) & Q(n_bot_explanations__gte = 2)
+        return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS) & \
+               Q(n_bot_explanations__gte   = settings.BOT_EXPLANATIONS)
 
     # from http://stackoverflow.com/a/2118712/946226
     @classmethod
@@ -252,11 +254,14 @@ class GameRound(models.Model):
         human_expls = word.explanation_set.filter(author__isnull = False)
         bot_expls = word.explanation_set.filter(bot__isnull = False)
 
-        assert len(human_expls) >= 2, "n_human_explanations was not up to date?"
-        assert len(bot_expls) >= 2, "n_bot_explanations was not up to date?"
-        expl = random.sample(human_expls, 2) + random.sample(bot_expls, 2)
+        assert len(human_expls) >= settings.HUMAN_EXPLANATIONS, \
+                    "n_human_explanations was not up to date?"
+        assert len(bot_expls) >= settings.BOT_EXPLANATIONS, \
+                    "n_bot_explanations was not up to date?"
+        expl = random.sample(human_expls, settings.HUMAN_EXPLANATIONS) + \
+               random.sample(bot_expls, settings.BOT_EXPLANATIONS)
 
-        poss = range(5)
+        poss = range(1 + len(expl))
         random.shuffle(poss)
 
         round = GameRound(
@@ -276,13 +281,14 @@ class GameRound(models.Model):
         return round
 
     def get_explanations(self):
-        expls = [None,None,None,None,None]
+        entries = GameRoundEntry.objects.filter(gameround=self)
+        expls = [None] * (1 + entries.count())
         expls[self.pos] = {
             'text': self.word.correct_explanation,
             'guess': self.guess,
             'actual': CORRECT,
         }
-        for e in GameRoundEntry.objects.filter(gameround=self):
+        for e in entries:
             expls[e.pos] = {
                     'text': e.explanation.explanation,
                     'guess': e.guess,

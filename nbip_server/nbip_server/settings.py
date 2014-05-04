@@ -133,3 +133,6 @@ LOGIN_REDIRECT_URL = 'index'
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: 'index'
 }
+
+HUMAN_EXPLANATIONS = 2
+BOT_EXPLANATIONS = 0
