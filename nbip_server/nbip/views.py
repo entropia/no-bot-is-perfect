@@ -30,7 +30,7 @@ def submit(request):
             word.author = request.user
             word.save()
             messages.success(request, u"Vielen Dank für Deinen Beitrag „%s“!" % word.lemma)
-            return redirect('index')
+            return redirect('submit')
     else:
         form = SubmitForm()
 
