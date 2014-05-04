@@ -41,10 +41,10 @@ urlpatterns = patterns('',
 
     # url(r'^accounts/', include('registration.backends.simple.urls')),
     url(r'^accounts/register/$',
-                    RegistrationView.as_view(),
+                    RegistrationView.as_view(template_name='nbip/registration_form.html'),
                     name='registration_register'),
     url(r'^accounts/register/closed/$',
-                    TemplateView.as_view(template_name='registration/registration_closed.html'),
+                    TemplateView.as_view(template_name='nbip/registration_closed.html'),
                     name='registration_disallowed'),
 
     url(r'^admin/', include(admin.site.urls)),
