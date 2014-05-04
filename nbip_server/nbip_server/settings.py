@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrapform',
+    'registration',
     'nbip',
 )
 
@@ -125,4 +126,10 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
         messages.ERROR: 'danger'
+}
+
+LOGIN_REDIRECT_URL = 'index'
+
+ABSOLUTE_URL_OVERRIDES = {
+    'auth.user': lambda u: 'index'
 }

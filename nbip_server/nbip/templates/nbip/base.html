@@ -68,7 +68,8 @@
 <a href="{% url 'stats' %}" class="navbar-link">{{user}}</a>!</p>
 </div>
 {% else %}
-<a href="{% url 'login' %}" class="navbar-right btn navbar-btn">Einloggen</a>
+<a href="{% url 'registration_register' %}" class="navbar-right btn navbar-btn">Registrieren</a>
+<a href="{% url 'auth_login' %}" class="navbar-right btn navbar-btn">Einloggen</a>
 {% endif %}
 </div>
 </div>
