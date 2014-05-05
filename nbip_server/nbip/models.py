@@ -154,8 +154,13 @@ class Word(models.Model):
         return Q(~cls.q_owner(player) & ~cls.q_explained(player) & ~cls.q_guessed(player))
 
     @classmethod
+    def q_answer_unseen(cls, player):
+        return Q(~cls.q_owner(player) & ~cls.q_guessed(player))
+
+    @classmethod
     def q_complete(cls):
-        return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS) & \
+        # +1 so that the players own explanation can be removed
+        return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS + 1) & \
                Q(n_bot_explanations__gte   = settings.BOT_EXPLANATIONS)
 
     # from http://stackoverflow.com/a/2118712/946226
@@ -171,7 +176,7 @@ class Word(models.Model):
     @classmethod
     # similar to random, but only consider words with enough explanations
     def random_explained(cls, player):
-        words = cls.objects.filter(cls.q_unseen(player), cls.q_complete())
+        words = cls.objects.filter(cls.q_answer_unseen(player), cls.q_complete())
 
         # fetches everything; be smarter if required
         if len(words) < 1:
@@ -243,7 +248,7 @@ class GameRound(models.Model):
     @classmethod
     @transaction.atomic
     def start_new_round(cls, player):
-        # pick a valid word (not seen before)
+        # pick a valid word where the user has not seen the answer before
         word = Word.random_explained(player=player)
 
         # The word has not been seen by the user (not submitted by him, no
@@ -251,7 +256,9 @@ class GameRound(models.Model):
         # In particular, all explanations are not by him, so this check later
         # is redundant.
         # Later we might want to exclude this player's bot's explanations.
-        human_expls = word.explanation_set.filter(author__isnull = False)
+        human_expls = word.explanation_set \
+            .filter(author__isnull = False) \
+            .exclude(author = player)
         bot_expls = word.explanation_set.filter(bot__isnull = False)
 
         assert len(human_expls) >= settings.HUMAN_EXPLANATIONS, \
