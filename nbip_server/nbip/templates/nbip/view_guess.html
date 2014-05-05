@@ -1,4 +1,5 @@
 {% extends "nbip/base.html" %}
+{% load staticfiles %}
 
 {% block title %}Was ist richtig?{% endblock %}
 
@@ -6,15 +7,29 @@
 
 <div class="container">
 <p>Was mag denn ein <b>{{ word.lemma }}</b> sein?</p>
-<ul>
-{% for e in explanations %}
-<li>
-{{ e.text }}. Du dachtest {{ e.guess }}; richtig ist {{ e.actual }}.
-</li>
-{% endfor %}
-</ul>
 
-<a href="{% url "new_guess" %}" class="btn btn-default">Nochmal spielen</a>
+<div class="container-fluid form-group">
+  <div class="row">
+   {% for e in explanations %}
+    <div class="col-sm-4">
+     <div class="panel answer-panel">
+      {% if e.guess == e.actual %}
+       <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+      {% else %}
+       <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}-wrong.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+       <img class="answer-icon" src="{% static "icon-" %}{{e.actual}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+      {% endif %}
+      {{ e.text }}
+     </div>
+    </div>
+   {% endfor %}
+   <div class="col-sm-4 text-center">
+    <a href="{% url "new_guess" %}" class="btn btn-default">Nochmal spielen</a>
+   </div>
+  </div>
+</div>
+
+
 </div>
 
 {% endblock %}
