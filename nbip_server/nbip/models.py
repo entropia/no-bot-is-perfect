@@ -199,7 +199,7 @@ class Explanation(models.Model):
             help_text= u"<i>Wort</i> ist ein/eine <i>Erklärung</i>")
 
     # exactly one of these should be not null
-    author = models.ForeignKey(User, verbose_name="Autor", blank=True, null=True)
+    author = models.ForeignKey(User, verbose_name="Autor", blank=True, null=True, related_name="submitted_explanations")
     bot = models.ForeignKey(Bot, verbose_name="Bot", blank=True, null=True)
 
     def clean(self):
@@ -235,7 +235,7 @@ class GameRound(models.Model):
     pos = models.PositiveSmallIntegerField()
     # What the user guessed for the correct result
     guess = GuessField()
-    player = models.ForeignKey(User, verbose_name="Spieler")
+    player = models.ForeignKey(User, verbose_name="Spieler", related_name="gamerounds")
 
     def __unicode__(self):
         return "%s (%d)" % (self.word.lemma, self.id)
