@@ -12,12 +12,12 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
 <div class="container">
  <div class="row">
   <div class="col-sm-4">
-   <h2>
+   <h3>
     Deine Wörter
     <a class="btn btn-default btn-xs" href="{% url 'submit' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h2>
+   </h3>
    {% if user.submitted_words.all %}
     <ul class="list-group">
      {% for w in user.submitted_words.all %}
@@ -35,17 +35,17 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
   </div>
 
   <div class="col-sm-4">
-   <h2>
+   <h3>
     Deine Erklärungen
     <a class="btn btn-default btn-xs" href="{% url 'explain' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h2>
+   </h3>
    {% if user.submitted_explanations.all %}
     <ul class="list-group">
      {% for e in user.submitted_explanations.all %}
       <li class="list-group-item">
-       {{e}}
+       Ein/eine <strong>{{e.word}}</strong> ist ein/eine <strong>{{e.explanation}}</strong>.
       </li>
      {% endfor %}
     </ul>
@@ -58,12 +58,12 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
   </div>
 
   <div class="col-sm-4">
-   <h2>
+   <h3>
     Deine Spiele
     <a class="btn btn-default btn-xs" href="{% url 'new_guess' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h2>
+   </h3>
    {% if user.gamerounds.all %}
     <ul class="list-group">
      {% for g in user.gamerounds.all %}
