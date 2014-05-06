@@ -101,7 +101,7 @@ $(function (){
 
 {% block content %}
 <div class="container">
-<p>Was mag denn ein <strong>{{ word.lemma }}</strong> sein?</p>
+<p>Was mag denn ein/eine <strong>{{ word.lemma }}</strong> sein?</p>
 
 <form class="form-horizontal" role="form" method="POST">
 {% csrf_token %}
