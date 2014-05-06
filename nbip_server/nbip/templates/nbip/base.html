@@ -15,6 +15,33 @@
     padding-top: 0;
     padding-bottom: 0;
 }
+
+/* Based on http://matthewjamestaylor.com/blog/keeping-footers-at-the-bottom-of-the-page */
+html,
+body {
+   margin:0;
+   padding:0;
+   height:100%;
+}
+#wrap {
+   min-height:100%;
+   position:relative;
+}
+#footer-space {
+   padding-bottom:50px;   /* Height of the footer */
+}
+#footer {
+   position:absolute;
+   bottom:0;
+   width:100%;
+   height:50px;   /* Height of the footer */
+   background-color: rgb(238,238,238);
+}
+
+#footer a {
+   color: inherit;
+}
+
 </style>
 
 <!-- Bootstrap -->
@@ -34,6 +61,7 @@
 </head>
 
 <body>
+<div id="wrap">
 
 <nav class="navbar navbar-default navbar-static-top" role="navigation">
 <div class="container">
@@ -84,9 +112,23 @@
 </div>
 {% endif %}
 
-{# <h1>{% block title %}{% endblock %}</h1> #}
-
 {% block content %}{% endblock %}
+
+<div id="footer-space"/>
+
+<div id="footer">
+ <div class="navbar">
+   <div class="container">
+    <p class="text-muted navbar-text">
+     <a href="https://github.com/entropia/no-bot-is-perfect">Source</a>
+     &bull;
+     <a href="https://github.com/entropia/no-bot-is-perfect/issues">Issues</a>
+    </p>
+  </div>
+ </div>
+</div>
+
+</div> <!-- wrap -->
 
 </body>
 </html>
