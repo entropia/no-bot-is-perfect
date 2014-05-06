@@ -163,14 +163,25 @@ class Word(models.Model):
         return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS + 1) & \
                Q(n_bot_explanations__gte   = settings.BOT_EXPLANATIONS)
 
-    # from http://stackoverflow.com/a/2118712/946226
     @classmethod
     def random(cls, player):
-        words = cls.objects.filter(cls.q_unseen(player))
+        ''' Fetch a random to be explained '''
+        words = cls.objects \
+            .filter(cls.q_unseen(player))
 
-        # fetches everything; be smarter if required
         if len(words) < 1:
             raise NotEnoughWordsException()
+
+        needy_words = words \
+            .filter(n_human_explanations__lte = settings.HUMAN_EXPLANATIONS) \
+            .order_by('-n_human_explanations')
+
+        # If there are words with insufficient answers, return the one that is closest
+        # to having sufficient
+        if needy_words:
+            return needy_words.first()
+
+        # Otherwise return a random word
         return random.choice(words)
 
     @classmethod

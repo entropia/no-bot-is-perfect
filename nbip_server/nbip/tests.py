@@ -86,6 +86,19 @@ class SelectionMethodTests(NbipTestCase):
         w = Word.random(player=self.users[1])
         self.assertEqual(w,w1)
 
+    def testRandomPreferNeedyWord(self):
+        w1 = Word(lemma = 'Test', author=self.users[0])
+        w1.save()
+        w2 = Word(lemma = 'Test2', author=self.users[0])
+        w2.save()
+        self.addHumanExplanation(w1,1)
+        self.addHumanExplanation(w1,2)
+        self.addHumanExplanation(w1,3)
+        self.addHumanExplanation(w2,1)
+        for _ in range(10):
+            w = Word.random(player=self.users[4])
+            self.assertEqual(w,w2)
+
     def testRandomExplainedWord(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
         w1.save()
