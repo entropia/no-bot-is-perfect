@@ -12,7 +12,7 @@
   <div class="row">
    {% for e in explanations %}
     <div class="col-sm-4">
-     <div class="panel answer-panel">
+     <div class="panel panel-default answer-panel">
       {% if e.guess == e.actual %}
        <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
       {% else %}
