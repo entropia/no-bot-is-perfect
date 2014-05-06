@@ -125,7 +125,7 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 # https://coderwall.com/p/wekglq
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
-        messages.ERROR: 'danger'
+        messages.ERROR: 'warning'
 }
 
 LOGIN_REDIRECT_URL = 'index'
