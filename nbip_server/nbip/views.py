@@ -81,10 +81,9 @@ def explain(request):
 def new_guess(request):
     # Create a new game
     # and switch to it (or to the existing running game)
-    running_rounds = GameRound.objects.filter(guess__exact=None)
-    if running_rounds:
-        round = running_rounds[0]
-        return redirect('guess', round.pk)
+    running_round = GameRound.objects.filter(guess__exact=None, player = request.user).first()
+    if running_round:
+        return redirect('guess', running_round.pk)
     else:
         try:
             round = GameRound.start_new_round(player = request.user)
