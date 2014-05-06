@@ -95,8 +95,38 @@ def _get_stats(self):
             'usable_words':
                 Q(Word.q_unseen(self), Word.q_complete()),
             }
+        stats = {k: Word.objects.filter(q).count() for k, q in specs.iteritems()}
 
-        return {k: Word.objects.filter(q).count() for k, q in specs.iteritems()}
+        stats['played'] = GameRound.objects \
+                .filter(player = self) \
+                .exclude(guess__exact = None) \
+                .count()
+
+        stats['correct'] = GameRound.objects \
+                .filter(player = self) \
+                .exclude(guess = CORRECT) \
+                .count()
+
+        stats['detected_humans'] = GameRoundEntry.objects \
+                .filter(explanation__bot__exact = None) \
+                .filter(gameround__player = self) \
+                .filter(guess = HUMAN) \
+                .count()
+
+        stats['detected_bots'] = GameRoundEntry.objects \
+                .filter(explanation__author__exact = None) \
+                .filter(gameround__player = self) \
+                .filter(guess = COMPUTER) \
+                .count()
+
+        stats['tricked'] = GameRoundEntry.objects \
+                .filter(explanation__author = self) \
+                .exclude(guess__exact = None) \
+                .filter(guess = CORRECT) \
+                .count()
+
+        return stats
+
 # HACK! How to do this cleanly
 # (in a way so that the "user" in template's context supports this)
 User.stats = _get_stats
