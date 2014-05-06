@@ -65,6 +65,9 @@ class GuessField(models.PositiveSmallIntegerField):
         defaults.update(kwargs)
         return super(GuessField, self).formfield(**defaults)
 
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^nbip\.models\.GuessField"])
+
 # Exceptions
 
 class NotEnoughWordsException(Exception):
