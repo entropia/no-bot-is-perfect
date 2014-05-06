@@ -10,6 +10,9 @@
 echo "Executing 'python ${OPENSHIFT_REPO_DIR}nbip_server/manage.py syncdb --noinput'"
 python "$OPENSHIFT_REPO_DIR"nbip_server/manage.py syncdb --noinput
 
+echo "Executing 'python ${OPENSHIFT_REPO_DIR}nbip_server/manage.py migrate nbip'"
+python "$OPENSHIFT_REPO_DIR"nbip_server/manage.py migrate nbip
+
 echo "Executing 'python ${OPENSHIFT_REPO_DIR}nbip_server/manage.py populate_db'"
 python "$OPENSHIFT_REPO_DIR"nbip_server/manage.py populate_db
 
