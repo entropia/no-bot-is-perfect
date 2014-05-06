@@ -80,7 +80,6 @@ def explain(request):
 @login_required()
 def new_guess(request):
     # Create a new game
-    # TODO: For the current player
     # and switch to it (or to the existing running game)
     running_rounds = GameRound.objects.filter(guess__exact=None)
     if running_rounds:
@@ -90,7 +89,7 @@ def new_guess(request):
         try:
             round = GameRound.start_new_round(player = request.user)
         except NotEnoughWordsException:
-            messages.error(request, u"Leider gibt es nicht genügend Wörter. Motiviere deine Freunde, ein paar neue Wörter einzugeben und Erklärungen zu erfinden!")
+            messages.error(request, u"Leider gibt es nicht genügend Erklärungen. Motiviere deine Freunde, ein paar neue Erklärungen zu erfinden!")
             return redirect('index')
         return redirect('guess', round.pk)
 
