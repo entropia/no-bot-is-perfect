@@ -5,6 +5,7 @@ from django.forms import Form, ModelForm, CharField, HiddenInput, ChoiceField
 from django.contrib import messages
 from django.core.signing import Signer
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 from nbip.models import *
 
@@ -93,10 +94,14 @@ def new_guess(request):
             return redirect('index')
         return redirect('guess', round.pk)
 
+@login_required()
 def guess(request, round_id):
     round = get_object_or_404(GameRound, pk=round_id)
+    if round.player != request.user:
+        raise PermissionDenied
     if round.guess is not None:
         return redirect('view_guess', round.pk)
+
     expls = round.get_explanations()
     counts = round.get_counts()
 
@@ -116,8 +121,11 @@ def guess(request, round_id):
         }
     return render(request, 'nbip/guess.html', context)
 
+@login_required()
 def view_guess(request, round_id):
     round = get_object_or_404(GameRound, pk=round_id)
+    if round.player != request.user:
+        raise PermissionDenied
     if round.guess is None:
         return redirect('guess', round.pk)
     expls = round.get_explanations()
