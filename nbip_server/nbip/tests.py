@@ -66,6 +66,35 @@ class WordTests(NbipTestCase):
         self.assertEqual(Word.objects.get().n_bot_explanations, 1)
 
 
+class WordTests(NbipTestCase):
+    def setUp(self):
+        self.addUsers()
+        self.word = Word(lemma = 'Test', author=self.users[0])
+        self.word.save()
+
+    def clean_explanation1():
+        e = Explanation(word = self.word, explanation = "foo", author = self.users[0])
+        self.assertEqual(e.clean_explanation(), "foo")
+
+    def clean_explanation2():
+        e = Explanation(word = self.word, explanation = "ein foo", author = self.users[0])
+        self.assertEqual(e.clean_explanation(), "foo")
+
+    def clean_explanation3():
+        e = Explanation(word = self.word, explanation = "ist ein foo", author = self.users[0])
+        self.assertEqual(e.clean_explanation(), "foo")
+
+    def clean_explanation4():
+        e = Explanation(word = self.word, explanation = "Ein Test ist ein foo", author = self.users[0])
+        self.assertEqual(e.clean_explanation(), "foo")
+
+
+
+# all the tests related to choosing correct words/explanations
+class SelectionMethodTests(NbipTestCase):
+    def setUp(self):
+        self.addUsers()
+
 # all the tests related to choosing correct words/explanations
 class SelectionMethodTests(NbipTestCase):
     def setUp(self):

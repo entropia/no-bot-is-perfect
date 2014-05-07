@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import random
+import re
 
 from django.db import models, transaction
 from django.db.models import Count, Q
@@ -234,6 +235,18 @@ class Word(models.Model):
             Explanation.objects.filter(bot__isnull = False, word__exact = self.id).count()
         self.save()
 
+    def clean_an_explanation(self, e):
+        r = r"(eine?)? ?(" + re.escape(self.lemma) + \
+            r")? ?(ist)? ?(eine?) ?"
+        m = re.match(r, e, re.IGNORECASE)
+        if m:
+            return e[m.end(0):]
+        else:
+            return e
+
+    def clean_explanation(self):
+        return self.clean_an_explanation(self.correct_explanation)
+
     def __unicode__(self):
         return self.lemma
 
@@ -256,6 +269,9 @@ class Explanation(models.Model):
             raise ValidationError('Autor oder Bot müssen gesetzt sein.')
         if self.author is not None and self.bot is not None:
             raise ValidationError('Autor und Bot dürfen nicht beide gesetzt sein.')
+
+    def clean_explanation(self):
+        return self.word.clean_an_explanation(self.explanation)
 
     def type(self):
         '''HUMAN or COMPUTER'''
@@ -335,13 +351,13 @@ class GameRound(models.Model):
         entries = GameRoundEntry.objects.filter(gameround=self)
         expls = [None] * (1 + entries.count())
         expls[self.pos] = {
-            'text': self.word.correct_explanation,
+            'text': self.word.clean_explanation(),
             'guess': self.guess,
             'actual': CORRECT,
         }
         for e in entries:
             expls[e.pos] = {
-                    'text': e.explanation.explanation,
+                    'text': e.explanation.clean_explanation(),
                     'guess': e.guess,
                     'actual': e.explanation.type(),
             }
