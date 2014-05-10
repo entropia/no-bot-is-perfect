@@ -79,60 +79,6 @@ class NotEnoughExplanationsException(Exception):
     pass
 
 
-
-
-# various stats
-def _get_stats(self):
-        specs = {
-            'words':
-                Q(),
-            'own_words':
-                Word.q_owner(self),
-            'explained_words':
-                Q(Word.q_explained(self)),
-            'guessed_words':
-                Q(Word.q_guessed(self)),
-            'incomplete_words':
-                Q(Word.q_unseen(self), ~Word.q_complete()),
-            'usable_words':
-                Q(Word.q_unseen(self), Word.q_complete()),
-            }
-        stats = {k: Word.objects.filter(q).count() for k, q in specs.iteritems()}
-
-        stats['played'] = GameRound.objects \
-                .filter(player = self) \
-                .exclude(guess__exact = None) \
-                .count()
-
-        stats['correct'] = GameRound.objects \
-                .filter(player = self) \
-                .exclude(guess = CORRECT) \
-                .count()
-
-        stats['detected_humans'] = GameRoundEntry.objects \
-                .filter(explanation__bot__exact = None) \
-                .filter(gameround__player = self) \
-                .filter(guess = HUMAN) \
-                .count()
-
-        stats['detected_bots'] = GameRoundEntry.objects \
-                .filter(explanation__author__exact = None) \
-                .filter(gameround__player = self) \
-                .filter(guess = COMPUTER) \
-                .count()
-
-        stats['tricked'] = GameRoundEntry.objects \
-                .filter(explanation__author = self) \
-                .exclude(guess__exact = None) \
-                .filter(guess = CORRECT) \
-                .count()
-
-        return stats
-
-# HACK! How to do this cleanly
-# (in a way so that the "user" in template's context supports this)
-User.stats = _get_stats
-
 # Models
 
 class Bot(models.Model):
@@ -355,7 +301,7 @@ class GameRound(models.Model):
         return round
 
     def get_explanations(self):
-        entries = GameRoundEntry.objects.filter(gameround=self)
+        entries = self.entries.all()
         expls = [None] * (1 + entries.count())
         expls[self.pos] = {
             'text': self.word.clean_explanation(),
@@ -417,8 +363,126 @@ class GameRoundEntry(models.Model):
         ordering = ['pos']
         unique_together = ('gameround','explanation','pos')
 
-    gameround = models.ForeignKey(GameRound)
+    gameround = models.ForeignKey(GameRound, related_name="entries")
     explanation = models.ForeignKey(Explanation)
     pos = models.PositiveSmallIntegerField()
     guess = GuessField()
 
+class Stats(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+
+    n_words = models.PositiveIntegerField(
+            verbose_name = "Eingereichte Wörter",
+            default = 0)
+
+    n_explanations = models.PositiveIntegerField(
+            verbose_name = "Eingereichte Erklärungen",
+            default = 0)
+
+    n_games = models.PositiveIntegerField(
+            verbose_name = "Spielrunden",
+            default = 0)
+
+    n_correct = models.PositiveIntegerField(
+            verbose_name = "Korrekt geraten",
+            default = 0)
+
+    n_wrong = models.PositiveIntegerField(
+            verbose_name = "Falsch geraten",
+            default = 0)
+
+    n_detected_human = models.PositiveIntegerField(
+            verbose_name = "Mensch erkannt",
+            default = 0)
+
+    n_detected_bot = models.PositiveIntegerField(
+            verbose_name = "Computer erkannt",
+            default = 0)
+
+    n_tricked = models.PositiveIntegerField(
+            verbose_name = "Andere reingelegt",
+            default = 0)
+
+    n_not_tricked = models.PositiveIntegerField(
+            verbose_name = "Andere nicht reingelegt",
+            default = 0)
+
+    def attrs(self):
+        for field in self._meta.fields:
+            if type(field) == models.PositiveIntegerField:
+                yield field.verbose_name, getattr(self, field.name)
+
+
+    def update(self):
+
+        self.n_words = \
+            self.user.submitted_words.count()
+        self.n_explanations = \
+            self.user.submitted_explanations.count()
+
+        self.n_games = \
+            self.user.gamerounds.exclude(guess__exact = None).count()
+        self.n_correct = \
+            self.user.gamerounds.exclude(guess__exact = None).filter(guess = CORRECT).count()
+        self.n_wrong = \
+            self.user.gamerounds.exclude(guess__exact = None).exclude(guess = CORRECT).count()
+
+        self.n_detected_human = \
+            GameRoundEntry.objects \
+                .filter(explanation__bot__exact = None) \
+                .filter(gameround__player = self.user) \
+                .filter(guess = HUMAN) \
+                .count()
+
+        self.n_detected_bot = \
+            GameRoundEntry.objects \
+                .filter(explanation__author__exact = None) \
+                .filter(gameround__player = self.user) \
+                .filter(guess = COMPUTER) \
+                .count()
+
+        self.n_tricked = \
+            GameRoundEntry.objects \
+                .filter(explanation__author = self.user) \
+                .exclude(guess__exact = None) \
+                .filter(guess = CORRECT) \
+                .count()
+
+        self.n_not_tricked = \
+            GameRoundEntry.objects \
+                .filter(explanation__author = self.user) \
+                .exclude(guess__exact = None) \
+                .exclude(guess = CORRECT) \
+                .count()
+
+        self.save()
+
+# HACK! How to do this cleanly
+# (in a way so that the "user" in template's context supports this)
+# User.stats = _get_stats
+
+# Keep Stats up-to-date
+@receiver(post_save, dispatch_uid="stats update")
+@receiver(post_delete, dispatch_uid="stats update 2")
+def update_stats(sender, instance, **kwargs):
+    affected_users = set()
+    if type(instance) == Word:
+        affected_users.add(instance.author)
+    elif type(instance) == Explanation:
+        affected_users.add(instance.author)
+    elif type(instance) == GameRound:
+        affected_users.add(instance.player)
+        affected_users.add(instance.word.author)
+        for e in instance.entries.all():
+            if e.explanation.type() == HUMAN:
+                affected_users.add(e.explanation.author)
+            else:
+                affected_users.add(e.explanation.bot.author)
+
+    for u in affected_users:
+        # Create stats object
+        if not(hasattr(u, 'stats')):
+            u.stats = Stats()
+            u.stats.save()
+
+        u.stats.update()

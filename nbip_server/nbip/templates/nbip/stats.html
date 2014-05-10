@@ -6,7 +6,7 @@
 <div class="container">
 <h2>Statistiken <small>für {{user}}</small></h2>
 <ul>
-{% for k, v in user.stats.items %}
+{% for k, v in user.stats.attrs %}
 <li>{{k}}: {{v}}</li>
 {% endfor %}
 </ul>

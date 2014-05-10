@@ -146,6 +146,11 @@ def highscore(request):
 
 @login_required()
 def stats(request):
+    if not(hasattr(request.user, 'stats')):
+        request.user.stats = Stats()
+        request.user.stats.save()
+        request.user.stats.update()
+
     context = {
     }
     return render(request, 'nbip/stats.html', context)
