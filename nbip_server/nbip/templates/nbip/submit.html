@@ -5,11 +5,43 @@
 {% block title %}Neues Wort einreichen{% endblock %}
 
 {% block content %}
+
 <div class="container">
-<form action="" method="post" role="form">
+<form class="form-horizontal" role="form" method="POST">
 {% csrf_token %}
-{{ form|bootstrap }}
-<input type="submit" value="Wort einreichen" />
+
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+
+ <div class="row">
+  <div class="form-group">
+   <div class="form-inline col-sm-8 col-sm-offset-2 ">
+    Ein/eine
+    <input class="form-control" id="id_lemma" name="lemma" type="text" placeholder="&lt;Substantiv&gt;"/>
+    ist ein/eine
+    <input class="form-control" id="id_explanation" name="explanation" type="text" placeholder="&lt;Adjektiv&gt; &lt;Substantiv&gt;"/>
+   </div>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="form-group">
+   <div class="form-inline col-sm-8 col-sm-offset-2 ">
+    und mehr dazu findet man auf
+    <input class="form-control" id="id_reference" name="reference" type="text" placeholder="http://"/> (optional).
+  </div>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="form-group">
+   <div class="col-sm-8 col-sm-offset-2">
+    <input class="btn btn-default" type="submit" value="Wort einreichen" />
+   </div>
+  </div>
+ </div>
+
 </form>
 </div>
 
