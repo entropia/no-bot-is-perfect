@@ -80,7 +80,7 @@ $(function (){
 
 				// move draggable here
 				ui.draggable.css({position: "relative", top:"", left:""});
-				$(panel).prepend(ui.draggable);
+				$(panel).find(".answer-icon-holder").prepend(ui.draggable);
 
 				// Show placeholders only where relevant
 				$(".answer-placeholder").show();
@@ -129,8 +129,14 @@ $(function (){
    {% for e in explanations %}
     <div class="col-sm-4">
      <div class="panel panel-default answer-panel">
-      <img class="answer-placeholder" src="{% static "empty.png" %}"/>
-      {{ e.text }}
+      <table><tr>
+ 	<td class="answer-icon-holder">
+	 <img class="answer-placeholder" src="{% static "empty.png" %}"/>
+	</td>
+	<td>
+         {{ e.text }}
+	</td>
+      </tr></table>
      </div>
     </div>
    {% endfor %}

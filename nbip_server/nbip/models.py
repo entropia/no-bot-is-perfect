@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
+import django.utils.http
 
 # Enumeration type
 class Guess(int):
@@ -247,6 +248,12 @@ class Word(models.Model):
     def clean_explanation(self):
         return self.clean_an_explanation(self.correct_explanation)
 
+    def link(self):
+        if self.reference:
+            return self.reference
+        else:
+            return "https://duckduckgo.com/?q=%s" % django.utils.http.urlquote(self.lemma)
+
     def __unicode__(self):
         return self.lemma
 
@@ -352,6 +359,7 @@ class GameRound(models.Model):
         expls = [None] * (1 + entries.count())
         expls[self.pos] = {
             'text': self.word.clean_explanation(),
+            'author' : self.word.author,
             'guess': self.guess,
             'actual': CORRECT,
         }
@@ -359,6 +367,7 @@ class GameRound(models.Model):
             expls[e.pos] = {
                     'text': e.explanation.clean_explanation(),
                     'guess': e.guess,
+                    'author': e.explanation.author,
                     'actual': e.explanation.type(),
             }
         return expls

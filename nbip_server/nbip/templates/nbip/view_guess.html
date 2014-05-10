@@ -6,20 +6,29 @@
 {% block content %}
 
 <div class="container">
-<p>Ein/eine <b>{{ word.lemma }}</b> ist also ein/eine...</p>
+<p>Ein/eine <b>{{ word.lemma }}</b> ist also ein/eine <b>{{ word.clean_explanation }}</b>. <a href="{{ word.link }}">Zweifel?</a></p>
 
 <div class="container-fluid form-group">
   <div class="row">
    {% for e in explanations %}
     <div class="col-sm-4">
      <div class="panel panel-default answer-panel">
-      {% if e.guess == e.actual %}
-       <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
-      {% else %}
-       <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}-wrong.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
-       <img class="answer-icon" src="{% static "icon-" %}{{e.actual}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
-      {% endif %}
-      {{ e.text }}
+      <table>
+       <tr>
+	<td rowspan="2">
+	 {% if e.guess == e.actual %}
+	  <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+	 {% else %}
+	  <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}-wrong.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+	  <img class="answer-icon" src="{% static "icon-" %}{{e.actual}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
+	 {% endif %}
+	</td>
+	<td>{{ e.text }}</td>
+       </tr>
+       <tr>
+	<td class="small" style="font-style: italic">{{ e.author }}</td>
+       </tr>
+      </table>
      </div>
     </div>
    {% endfor %}
