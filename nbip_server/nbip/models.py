@@ -479,9 +479,10 @@ def update_stats(sender, instance, **kwargs):
                 affected_users.add(e.explanation.bot.author)
 
     for u in affected_users:
-        # Create stats object
-        if not(hasattr(u, 'stats')):
-            u.stats = Stats()
-            u.stats.save()
+        if u:
+            # Create stats object
+            if not(hasattr(u, 'stats')):
+                u.stats = Stats()
+                u.stats.save()
 
-        u.stats.update()
+            u.stats.update()
