@@ -15,7 +15,7 @@
      <div class="panel panel-default answer-panel">
       <table>
        <tr>
-	<td rowspan="2">
+	<td rowspan="2" style="white-space:nowrap">
 	 {% if e.guess == e.actual %}
 	  <img class="answer-icon" src="{% static "icon-" %}{{e.guess}}.png" data-answer="{{answer}}" alt="Antwort {{answer}}"/>
 	 {% else %}
