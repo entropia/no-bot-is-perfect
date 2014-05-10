@@ -412,7 +412,6 @@ class Stats(models.Model):
             if type(field) == models.PositiveIntegerField:
                 yield field.verbose_name, getattr(self, field.name)
 
-
     def update(self):
 
         self.n_words = \

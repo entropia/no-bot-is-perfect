@@ -6,6 +6,9 @@ from django.contrib import messages
 from django.core.signing import Signer
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
+
+import json
 
 from nbip.models import *
 
@@ -154,3 +157,20 @@ def stats(request):
     context = {
     }
     return render(request, 'nbip/stats.html', context)
+
+def highscore_data(request):
+    s = []
+    for stats in Stats.objects.all():
+        row = {
+            'user_id': stats.user.pk,
+            'user_name': stats.user.username,
+            }
+        row['values'] = []
+        for field in stats._meta.fields:
+            if type(field) == models.PositiveIntegerField:
+                row[field.name] = getattr(stats, field.name)
+        s.append(row)
+    data = {
+        'rows': s
+    }
+    return HttpResponse(json.dumps(data), content_type="application/json")

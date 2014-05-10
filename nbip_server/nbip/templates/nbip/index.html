@@ -1,5 +1,30 @@
 {% extends "nbip/base.html" %}
 
+{% block page-js %}
+function update_highscore() {
+    cols = ["n_games", "n_explanations", "n_correct", "n_tricked"];
+    $.getJSON("{% url "highscore_data" %}")
+	.done(function (data) {
+	    $("#highscore tbody").empty();
+	    jQuery.map(data['rows'], function(rowdata,i) {
+		var r = $("<tr>");
+		r.append($("<td>").text(i+1));
+		r.append($("<td>").text(rowdata["user_name"]));
+		jQuery.map(cols, function (c) {
+		    r.append($("<td>").text(rowdata[c]));
+		});
+		$("#highscore tbody").append(r);
+	    });
+	});
+    setTimeout(update_highscore, 30000);
+}
+
+$(function() {
+    update_highscore()
+})
+
+{% endblock %}
+
 {% block title %}Willkommen{% endblock %}
 
 {% block content %}
@@ -82,6 +107,26 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
  </div>
 </div>
 {% endif %}
+
+<div class="container">
+ <h3>Highscores</h3>
+ <table class="table" id="highscore">
+  <thead>
+   <tr>
+     <th>#</th>
+     <th>User</th>
+     <th>Wörter</th>
+     <th>Erklärungen</th>
+     <th>Richtig geraten</th>
+     <th>Andere reingelegt</th>
+   </tr>
+  </thead>
+  <tbody>
+   <tr><td>1</td><td>foo</td><td>5</td></tr>
+  </tbody>
+ </table>
+
+</div>
 
 
 {% endblock %}
