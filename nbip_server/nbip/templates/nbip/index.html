@@ -1,18 +1,49 @@
 {% extends "nbip/base.html" %}
 
+{% block page-css %}
+
+#highscore thead th {
+	text-align:center;
+}
+#highscore thead th:nth-child(2) {
+	text-align:left;
+}
+
+#highscore tbody td {
+	text-align:right;
+}
+#highscore tbody td:nth-child(2) {
+	text-align:left;
+}
+
+{% endblock %}
+
 {% block page-js %}
+function perc_row(a,b) {
+	if (a + b > 0) {
+		return $("<td>").addClass("small").text((a / (a + b)).toFixed(3));
+	} else {
+		return $("<td>").addClass("small").text("–");
+
+	}
+}
+
 function update_highscore() {
-    cols = ["n_games", "n_explanations", "n_correct", "n_tricked"];
     $.getJSON("{% url "highscore_data" %}")
 	.done(function (data) {
 	    $("#highscore tbody").empty();
 	    jQuery.map(data['rows'], function(rowdata,i) {
-		var r = $("<tr>");
-		r.append($("<td>").text(i+1));
-		r.append($("<td>").text(rowdata["user_name"]));
-		jQuery.map(cols, function (c) {
-		    r.append($("<td>").text(rowdata[c]));
-		});
+		var r = $("<tr>").append([
+			$("<td>").text(i+1),
+			$("<td>").text(rowdata["user_name"]),
+			$("<td>").text(rowdata["n_words"]),
+			$("<td>").text(rowdata["n_explanations"]),
+			$("<td>").text(rowdata["n_games"]),
+			$("<td>").text(rowdata["n_correct"]),
+			perc_row(rowdata["n_correct"], rowdata["n_wrong"]),
+			$("<td>").text(rowdata["n_tricked"]),
+			perc_row(rowdata["n_tricked"], rowdata["n_not_tricked"]),
+		]);
 		$("#highscore tbody").append(r);
 	    });
 	});
@@ -111,18 +142,24 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
 <div class="container">
  <h3>Highscores</h3>
  <table class="table" id="highscore">
+   <colgroup>
+    <col width="0%"/>
+    <col width="100%" style="text-align:left"/>
+    <col width="0%" span="3"/ style="text:align:right">
+    <col width="0%" span="4"/>
+  </colgroup>
   <thead>
    <tr>
      <th>#</th>
      <th>User</th>
      <th>Wörter</th>
      <th>Erklärungen</th>
-     <th>Richtig geraten</th>
-     <th>Andere reingelegt</th>
+     <th>Spiele</th>
+     <th colspan="2">Richtig geraten</th>
+     <th colspan="2">Andere reingelegt</th>
    </tr>
   </thead>
   <tbody>
-   <tr><td>1</td><td>foo</td><td>5</td></tr>
   </tbody>
  </table>
 
