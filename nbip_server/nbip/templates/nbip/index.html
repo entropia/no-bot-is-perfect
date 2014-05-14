@@ -1,5 +1,9 @@
 {% extends "nbip/base.html" %}
 
+{% block page-header %}
+<!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.16.4/jquery.tablesorter.min.js"/> -->
+{% endblock %}
+
 {% block page-css %}
 
 #highscore thead th {
@@ -45,13 +49,15 @@ function update_highscore() {
 			perc_row(rowdata["n_tricked"], rowdata["n_not_tricked"]),
 		]);
 		$("#highscore tbody").append(r);
+		console.log(r);
 	    });
+	    $("#highscore").trigger("update");
 	});
     setTimeout(update_highscore, 30000);
 }
 
 $(function() {
-    update_highscore()
+    update_highscore();
 })
 
 {% endblock %}
@@ -144,8 +150,8 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
  <table class="table" id="highscore">
    <colgroup>
     <col width="0%"/>
-    <col width="100%" style="text-align:left"/>
-    <col width="0%" span="3"/ style="text:align:right">
+    <col width="100%"/>
+    <col width="0%" span="3"/>
     <col width="0%" span="4"/>
   </colgroup>
   <thead>
@@ -158,6 +164,28 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
      <th colspan="2">Richtig geraten</th>
      <th colspan="2">Andere reingelegt</th>
    </tr>
+  <!--
+   <tr>
+     <th class="sorter-false">#</th>
+     <th class="sorter-false">User</th>
+     <th class="sorter-false">Wörter</th>
+     <th class="sorter-false">Erklärungen</th>
+     <th class="sorter-false">Spiele</th>
+     <th class="sorter-false" colspan="2">Richtig geraten</th>
+     <th class="sorter-false" colspan="2">Andere reingelegt</th>
+   </tr>
+   <tr>
+     <th class="sorter-false"/>
+     <th class="sorter-false"/>
+     <th/>
+     <th/>
+     <th/>
+     <th/>
+     <th/>
+     <th/>
+     <th/>
+    </tr>
+   -->
   </thead>
   <tbody>
   </tbody>
