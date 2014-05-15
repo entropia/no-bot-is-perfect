@@ -456,10 +456,6 @@ class Stats(models.Model):
 
         self.save()
 
-# HACK! How to do this cleanly
-# (in a way so that the "user" in template's context supports this)
-# User.stats = _get_stats
-
 # Keep Stats up-to-date
 @receiver(post_save, dispatch_uid="stats update")
 @receiver(post_delete, dispatch_uid="stats update 2")

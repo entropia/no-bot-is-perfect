@@ -20,6 +20,12 @@
 	text-align:left;
 }
 
+ul.contributions {
+	max-height:12em;
+	overflow-y:auto;
+
+}
+
 {% endblock %}
 
 {% block page-js %}
@@ -81,7 +87,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     </a>
    </h3>
    {% if user.submitted_words.all %}
-    <ul class="list-group">
+    <ul class="list-group contributions">
      {% for w in user.submitted_words.all %}
       <li class="list-group-item">
        {{w}}
@@ -104,7 +110,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     </a>
    </h3>
    {% if user.submitted_explanations.all %}
-    <ul class="list-group">
+    <ul class="list-group contributions">
      {% for e in user.submitted_explanations.all %}
       <li class="list-group-item">
        Ein/eine <strong>{{e.word}}</strong> ist ein/eine <strong>{{e.explanation}}</strong>.
@@ -127,7 +133,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     </a>
    </h3>
    {% if user.gamerounds.all %}
-    <ul class="list-group">
+    <ul class="list-group contributions">
      {% for g in user.gamerounds.all %}
       <li class="list-group-item">
        <a href="{% url "view_guess" g.pk %}">{{g.word}}</a>
