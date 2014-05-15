@@ -29,35 +29,71 @@ ul.contributions {
 {% endblock %}
 
 {% block page-js %}
+
+var highscorerows = [];
+
+// General helper to animate a few things
+function smooth_highscore (callback) {
+	var pos_now = {};
+	$("#highscore tbody tr").each(function (i,e) {
+		pos_now[$(e).data('user_id')] = $(e).offset();
+	});
+
+	callback();
+
+	// animate all motion
+	$("#highscore tbody tr").each(function (i,e) {
+		var e_pos_now = pos_now[$(e).data('user_id')];
+		if (e_pos_now) {
+			var e_pos_target = $(e).offset();
+
+			$(e).find("td > *").css('position', 'relative');
+			$(e).find("td > *").css('top', e_pos_now.top - e_pos_target.top);
+			$(e).find("td > *").css('left', e_pos_now.left - e_pos_target.left);
+			$(e).find("td > *").animate({left: 0, top: 0});
+		}
+	});
+}
+
+
 function perc_row(a,b) {
 	if (a + b > 0) {
-		return $("<td>").addClass("small").text((a / (a + b)).toFixed(3));
+		return cell((a / (a + b)).toFixed(3)).addClass("small");
 	} else {
-		return $("<td>").addClass("small").text("–");
-
+		return cell("–").addClass("");
 	}
 }
+function cell(c) {
+	return $("<td>").append($("<div>").text(c));
+}
+
+function fillhighscoretable() {smooth_highscore(function() { 
+    $("#highscore tbody").empty();
+    jQuery.map(highscorerows, function(rowdata,i) {
+	var r = $("<tr>").append([
+		cell(i+1),
+		cell(rowdata["user_name"]),
+		cell(rowdata["n_words"]),
+		cell(rowdata["n_explanations"]),
+		cell(rowdata["n_games"]),
+		cell(rowdata["n_correct"]),
+		perc_row(rowdata["n_correct"], rowdata["n_wrong"]),
+		cell(rowdata["n_tricked"]),
+		perc_row(rowdata["n_tricked"], rowdata["n_not_tricked"]),
+	]).data('user_id', rowdata["user_id"]);
+	$("#highscore tbody").append(r);
+    });
+});}
+
 
 function update_highscore() {
     $.getJSON("{% url "highscore_data" %}")
 	.done(function (data) {
-	    $("#highscore tbody").empty();
-	    jQuery.map(data['rows'], function(rowdata,i) {
-		var r = $("<tr>").append([
-			$("<td>").text(i+1),
-			$("<td>").text(rowdata["user_name"]),
-			$("<td>").text(rowdata["n_words"]),
-			$("<td>").text(rowdata["n_explanations"]),
-			$("<td>").text(rowdata["n_games"]),
-			$("<td>").text(rowdata["n_correct"]),
-			perc_row(rowdata["n_correct"], rowdata["n_wrong"]),
-			$("<td>").text(rowdata["n_tricked"]),
-			perc_row(rowdata["n_tricked"], rowdata["n_not_tricked"]),
-		]);
-		$("#highscore tbody").append(r);
-		console.log(r);
-	    });
-	    $("#highscore").trigger("update");
+		highscorerows = data['rows'];
+		highscorerows.sort(function (a,b) {
+			return (b["n_words"]) - (a["n_words"]);
+		});
+		fillhighscoretable();
 	});
     setTimeout(update_highscore, 30000);
 }
