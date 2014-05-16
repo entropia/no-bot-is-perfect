@@ -26,6 +26,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -38,11 +40,12 @@ INSTALLED_APPS = (
     'bootstrapform',
     'registration',
     'south',
-    'debug_toolbar',
+#    'debug_toolbar',
     'nbip',
 )
 
 MIDDLEWARE_CLASSES = (
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
