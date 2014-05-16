@@ -65,9 +65,9 @@ function perc(a,b) {
 }
 
 function score(r) {
-    return Math.pow((1+r["n_words"]) * (1+r["n_explanations"]) * (1+r["n_games"]/10), 0.5)
-        * (r["n_correct"] + 1) / (r["n_correct"] + r["n_wrong"] + 1)
-        * (r["n_tricked"] + 1) / (r["n_tricked"] + r["n_not_tricked"] + 1)
+    return Math.pow((1+r[2]) * (1+r[3]) * (1+r[4]/10), 0.5)
+        * (r[5] + 1) / (r[5] + r[6] + 1)
+        * (r[7] + 1) / (r[7] + r[8] + 1)
 }
 
 function cell(c) {
@@ -106,8 +106,8 @@ function update_highscore() {
                 row[4],
                 row[5],
                 perc(row[5], row[6]),
-                row[6],
-                perc(row[6], row[7]),
+                row[7],
+                perc(row[7], row[8]),
                 score(row),
             ]]
         });
