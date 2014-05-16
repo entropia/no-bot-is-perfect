@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.forms import Form, ModelForm, CharField, HiddenInput, ChoiceField
+from django.forms import Form, ModelForm, CharField, HiddenInput
 from django.contrib import messages
 from django.core.signing import Signer
 from django.contrib.auth.decorators import login_required
