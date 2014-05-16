@@ -16,6 +16,9 @@ def index(request):
     context = {
         'n_words': Word.objects.count(),
         'n_explanations': Explanation.objects.count(),
+        'words': request.user.submitted_words.all(),
+        'expls': request.user.submitted_explanations.select_related('word'),
+        'gamerounds': request.user.gamerounds.select_related('word'),
     }
     return render(request, 'nbip/index.html', context)
 

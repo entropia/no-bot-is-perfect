@@ -143,9 +143,9 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
      <span class="glyphicon glyphicon-plus"></span>
     </a>
    </h3>
-   {% if user.submitted_words.all %}
+   {% if words %}
     <ul class="list-group contributions">
-     {% for w in user.submitted_words.all %}
+     {% for w in words %}
       <li class="list-group-item">
        {{w}}
       </li>
@@ -166,9 +166,9 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
      <span class="glyphicon glyphicon-plus"></span>
     </a>
    </h3>
-   {% if user.submitted_explanations.all %}
+   {% if expls  %}
     <ul class="list-group contributions">
-     {% for e in user.submitted_explanations.all %}
+     {% for e in expls %}
       <li class="list-group-item">
        Ein/eine <strong>{{e.word}}</strong> ist ein/eine <strong>{{e.explanation}}</strong>.
       </li>
@@ -179,7 +179,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     Du hast noch keine Erklärungen eingericht.
     <a href="{% url 'explain' %}">Ändere das doch!</a>
    </p>
-   {% endif %}
+  {% endif %}
   </div>
 
   <div class="col-sm-3">
@@ -189,9 +189,9 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
      <span class="glyphicon glyphicon-plus"></span>
     </a>
    </h3>
-   {% if user.gamerounds.all %}
+   {% if gamerounds %}
     <ul class="list-group contributions">
-     {% for g in user.gamerounds.all %}
+     {% for g in gamerounds %}
       <li class="list-group-item">
        <a href="{% url "view_guess" g.pk %}">{{g.word}}</a>
       </li>
