@@ -301,8 +301,8 @@ class GameRound(models.Model):
         return round
 
     def get_explanations(self):
-        entries = self.entries.all()
-        expls = [None] * (1 + entries.count())
+        entries = self.entries.select_related('explanation', 'explanation__author', 'explanation__word').all()
+        expls = [None] * (1 + len(entries))
         expls[self.pos] = {
             'text': self.word.clean_explanation(),
             'author' : self.word.author,

@@ -100,7 +100,7 @@ def new_guess(request):
 
 @login_required()
 def guess(request, round_id):
-    round = get_object_or_404(GameRound, pk=round_id)
+    round = get_object_or_404(GameRound.objects.select_related('word','word__author','player'), pk=round_id)
     if round.player != request.user:
         raise PermissionDenied
     if round.guess is not None:
@@ -127,7 +127,7 @@ def guess(request, round_id):
 
 @login_required()
 def view_guess(request, round_id):
-    round = get_object_or_404(GameRound, pk=round_id)
+    round = get_object_or_404(GameRound.objects.select_related('word','word__author','player'), pk=round_id)
     if round.player != request.user:
         raise PermissionDenied
     if round.guess is None:
