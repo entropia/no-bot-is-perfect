@@ -56,13 +56,20 @@ function smooth_highscore (callback) {
 }
 
 
-function perc_row(a,b) {
+function perc(a,b) {
 	if (a + b > 0) {
-		return cell((a / (a + b)).toFixed(3)).addClass("small");
+		return (a / (a + b)).toFixed(3);
 	} else {
-		return cell("–").addClass("");
+		return "–";
 	}
 }
+
+function score(r) {
+    return Math.pow(r["n_words"] * r["n_explanations"] * (r["n_games"]/10), 0.5)
+        * (r["n_correct"] + 1) / (r["n_correct"] + r["n_wrong"] + 1)
+        * (r["n_tricked"] + 1) / (r["n_tricked"] + r["n_not_tricked"] + 1)
+}
+
 function cell(c) {
 	return $("<td>").append($("<div>").text(c));
 }
@@ -72,15 +79,16 @@ function fillhighscoretable() {smooth_highscore(function() {
     jQuery.map(highscorerows, function(rowdata,i) {
 	var r = $("<tr>").append([
 		cell(i+1),
-		cell(rowdata["user_name"]),
-		cell(rowdata["n_words"]),
-		cell(rowdata["n_explanations"]),
-		cell(rowdata["n_games"]),
-		cell(rowdata["n_correct"]),
-		perc_row(rowdata["n_correct"], rowdata["n_wrong"]),
-		cell(rowdata["n_tricked"]),
-		perc_row(rowdata["n_tricked"], rowdata["n_not_tricked"]),
-	]).data('user_id', rowdata["user_id"]);
+		cell(rowdata[1]),
+		cell(rowdata[2]),
+		cell(rowdata[3]),
+		cell(rowdata[4]),
+		cell(rowdata[4]),
+		cell(rowdata[6]).addClass("small"),
+		cell(rowdata[7]),
+		cell(rowdata[8]).addClass("small"),
+		cell(rowdata[9].toFixed(3)),
+	]).data('user_id', rowdata[0]);
 	$("#highscore tbody").append(r);
     });
 });}
@@ -89,9 +97,22 @@ function fillhighscoretable() {smooth_highscore(function() {
 function update_highscore() {
     $.getJSON("{% url "highscore_data" %}")
 	.done(function (data) {
-		highscorerows = data['rows'];
+		highscorerows = jQuery.map(data['rows'], function (row) {
+            return [[
+                row["user_id"],
+                row["user_name"],
+                row["n_words"],
+                row["n_explanations"],
+                row["n_games"],
+                row["n_correct"],
+                perc(row["n_correct"], row["n_wrong"]),
+                row["n_tricked"],
+                perc(row["n_tricked"], row["n_not_tricked"]),
+                score(row),
+            ]]
+        });
 		highscorerows.sort(function (a,b) {
-			return (b["n_words"]) - (a["n_words"]);
+			return (b[9]) - (a[9]);
 		});
 		fillhighscoretable();
 	});
@@ -205,6 +226,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
      <th>Spiele</th>
      <th colspan="2">Richtig geraten</th>
      <th colspan="2">Andere reingelegt</th>
+     <th>Score</th>
    </tr>
   <!--
    <tr>
