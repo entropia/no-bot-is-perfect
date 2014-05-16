@@ -163,17 +163,17 @@ def stats(request):
 
 def highscore_data(request):
     s = []
-    for stats in Stats.objects.all():
-        row = {
-            'user_id': stats.user.pk,
-            'user_name': stats.user.username,
-            }
-        row['values'] = []
-        for field in stats._meta.fields:
-            if type(field) == models.PositiveIntegerField:
-                row[field.name] = getattr(stats, field.name)
-        s.append(row)
-    data = {
-        'rows': s
-    }
+    data = {}
+    data['cols'] = (
+        'user__id',
+        'user__username',
+        'n_words',
+        'n_explanations',
+        'n_games',
+        'n_correct',
+        'n_wrong',
+        'n_tricked',
+        'n_not_tricked',
+        )
+    data['rows'] = list(Stats.objects.select_related('user').values_list(*data['cols']))
     return HttpResponse(json.dumps(data), content_type="application/json")

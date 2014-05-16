@@ -99,15 +99,15 @@ function update_highscore() {
 	.done(function (data) {
 		highscorerows = jQuery.map(data['rows'], function (row) {
             return [[
-                row["user_id"],
-                row["user_name"],
-                row["n_words"],
-                row["n_explanations"],
-                row["n_games"],
-                row["n_correct"],
-                perc(row["n_correct"], row["n_wrong"]),
-                row["n_tricked"],
-                perc(row["n_tricked"], row["n_not_tricked"]),
+                row[0],
+                row[1],
+                row[2],
+                row[3],
+                row[4],
+                row[5],
+                perc(row[5], row[6]),
+                row[6],
+                perc(row[6], row[7]),
                 score(row),
             ]]
         });
