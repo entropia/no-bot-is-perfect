@@ -2,7 +2,7 @@
 <div class="container">
   <h2>
     {{ sql_queries|length }} Quer{{ sql_queries|pluralize:"y,ies" }}
-    <small style="cursor: pointer;" onclick="var s=document.getElementById('debugQueryTable').style;s.display=s.display=='none'?'':'none';this.innerHTML=this.innerHTML=='Show'?'Hide':'Show';">Show</span>
+    <small style="cursor: pointer;" onclick="var s=document.getElementById('debugQueryTable').style;s.display=s.display=='none'?'':'none';this.innerHTML=this.innerHTML=='Show'?'Hide':'Show';">Show</small>
   </h2>
   <table id="debugQueryTable" class="table" style="display: none;">
     <col width="1"></col>
