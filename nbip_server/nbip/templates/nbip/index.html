@@ -65,7 +65,7 @@ function perc(a,b) {
 }
 
 function score(r) {
-    return Math.pow(r["n_words"] * r["n_explanations"] * (r["n_games"]/10), 0.5)
+    return Math.pow((1+r["n_words"]) * (1+r["n_explanations"]) * (1+r["n_games"]/10), 0.5)
         * (r["n_correct"] + 1) / (r["n_correct"] + r["n_wrong"] + 1)
         * (r["n_tricked"] + 1) / (r["n_tricked"] + r["n_not_tricked"] + 1)
 }
