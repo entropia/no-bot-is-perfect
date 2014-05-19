@@ -22,11 +22,14 @@ SECRET_KEY = 'td!+n%m^&rbyde_3$vz*0ynnbg89fu^+#-6gu14klcs1+$^yzq'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    'no-bot-is-perfect.nomeata.de'
+    ]
 
-#DEBUG_TOOLBAR_PATCH_SETTINGS = False
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 # Application definition
 
@@ -40,12 +43,11 @@ INSTALLED_APPS = (
     'bootstrapform',
     'registration',
     'south',
-#    'debug_toolbar',
+    'debug_toolbar',
     'nbip',
 )
 
 MIDDLEWARE_CLASSES = (
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -53,6 +55,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+if DEBUG:
+    MIDDLEWARE_CLASSES = (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+        ) + MIDDLEWARE_CLASSES
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -140,3 +146,14 @@ ABSOLUTE_URL_OVERRIDES = {
 
 HUMAN_EXPLANATIONS = 2
 BOT_EXPLANATIONS = 0
+
+def show_toolbar(request):
+    if request.is_ajax():
+        return False
+
+    # return True here to enable the debug toolbar
+    return False
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': 'nbip_server.settings.show_toolbar',
+}
