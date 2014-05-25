@@ -12,7 +12,7 @@ class NbipTestCase(TestCase):
                 "p455w0rd"
             ))
         for i in range(len(self.users)):
-            Bot(owner = self.users[i], name = "bot%d" % i).save()
+            Bot(owner = self.users[i], name = "bot%d" % i, apikey = "bot%d" % i).save()
 
     # convenience functions
     def addHumanExplanation(self, word, n):

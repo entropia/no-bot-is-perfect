@@ -94,6 +94,24 @@ class Bot(models.Model):
     def __unicode__(self):
         return "%s by %s" % (self.name, self.owner)
 
+    def word_to_explain(self):
+        if not self.explaining:
+            word = Word.random_for_bot(bot = self)
+            self.explaining = word
+            self.save()
+        return self.explaining
+
+    @transaction.atomic
+    def explain_word(self, expl):
+        expl = Explanation(
+            word = self.explaining,
+            explanation = expl,
+            bot = self);
+        expl.save()
+        self.explaining = None
+        self.save()
+
+
 class Word(models.Model):
     class Meta:
         verbose_name = "Wort"
@@ -128,6 +146,11 @@ class Word(models.Model):
         return Q(id__in = explained)
 
     @classmethod
+    def q_bot_explained(cls, bot):
+        explained = Explanation.objects.filter(bot__exact = bot).values("word")
+        return Q(id__in = explained)
+
+    @classmethod
     def q_guessed(cls, player):
         guessed = GameRound.objects.filter(player__exact = player).values("word")
         return Q(id__in = guessed)
@@ -158,6 +181,27 @@ class Word(models.Model):
         needy_words = words \
             .filter(n_human_explanations__lte = settings.HUMAN_EXPLANATIONS) \
             .order_by('-n_human_explanations')
+
+        # If there are words with insufficient answers, return the one that is closest
+        # to having sufficient
+        if needy_words:
+            return needy_words.first()
+
+        # Otherwise return a random word
+        return random.choice(words)
+
+    @classmethod
+    def random_for_bot(cls, bot):
+        ''' Fetch a random to be explained by a bot '''
+        words = cls.objects \
+            .exclude(cls.q_bot_explained(bot))
+
+        if len(words) < 1:
+            raise NotEnoughWordsException()
+
+        needy_words = words \
+            .filter(n_bot_explanations__lte = settings.BOT_EXPLANATIONS) \
+            .order_by('-n_bot_explanations')
 
         # If there are words with insufficient answers, return the one that is closest
         # to having sufficient
@@ -235,6 +279,12 @@ class Explanation(models.Model):
         else:
             return COMPUTER
 
+    def author_name(self):
+        if self.author is not None:
+            return self.author
+        else:
+            return u"„%s“ by %s" % (self.bot.name, self.bot.owner)
+
     def __unicode__(self):
         return "%s ist ein/eine %s" % (self.word.lemma, self.explanation)
 
@@ -303,7 +353,7 @@ class GameRound(models.Model):
         return round
 
     def get_explanations(self):
-        entries = self.entries.select_related('explanation', 'explanation__author', 'explanation__word').all()
+        entries = self.entries.select_related('explanation', 'explanation__author', 'explanation__word','explanation__bot','explanation__bot__owner').all()
         expls = [None] * (1 + len(entries))
         expls[self.pos] = {
             'text': self.word.clean_explanation(),
@@ -315,7 +365,7 @@ class GameRound(models.Model):
             expls[e.pos] = {
                     'text': e.explanation.clean_explanation(),
                     'guess': e.guess,
-                    'author': e.explanation.author,
+                    'author': e.explanation.author_name(),
                     'actual': e.explanation.type(),
             }
         return expls
@@ -474,7 +524,7 @@ def update_stats(sender, instance, **kwargs):
             if e.explanation.type() == HUMAN:
                 affected_users.add(e.explanation.author)
             else:
-                affected_users.add(e.explanation.bot.author)
+                affected_users.add(e.explanation.bot.owner)
 
     for u in affected_users:
         if u:
