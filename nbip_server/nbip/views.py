@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 
+import uuid
 import json
 
 from nbip.models import *
@@ -61,6 +62,7 @@ def new_bot(request):
         if form.is_valid():
             bot = form.save(commit=False)
             bot.owner = request.user
+            bot.apikey = uuid.uuid4().hex
             bot.save()
             messages.success(request, u"Dein Bot „%s“ wurde angelegt." % bot.name)
             return redirect('index')

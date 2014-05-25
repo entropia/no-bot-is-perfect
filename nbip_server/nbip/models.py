@@ -88,6 +88,7 @@ class Bot(models.Model):
 
     owner = models.ForeignKey(User, verbose_name="Benutzer", related_name = "bots")
     name = models.CharField(max_length=200, verbose_name="Bot-Name")
+    apikey = models.CharField(max_length=100, unique=True, verbose_name="API-Key")
 
     def __unicode__(self):
         return "%s by %s" % (self.name, self.owner)
