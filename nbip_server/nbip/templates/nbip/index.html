@@ -254,7 +254,29 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
   <tbody>
   </tbody>
  </table>
+</div>
 
+<div class="container">
+   <h3>
+    Deine Bots
+    <a class="btn btn-default btn-xs" href="{% url 'new_bot' %}">
+     <span class="glyphicon glyphicon-plus"></span>
+    </a>
+   </h3>
+   {% if bots %}
+    <ul class="list-group">
+     {% for b in bots %}
+      <li class="list-group-item">
+       {{b.name}}
+      </li>
+     {% endfor %}
+    </ul>
+   {% else %}
+    <p>
+     Du hast noch keinen Bot angelegt.
+     <a href="{% url 'new_bot' %}">Mach das doch jetzt!</a>
+    </p>
+   {% endif %}
 </div>
 
 

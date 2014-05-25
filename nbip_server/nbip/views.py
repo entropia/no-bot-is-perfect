@@ -21,6 +21,7 @@ def index(request):
         context['words'] = request.user.submitted_words.all()
         context['expls'] = request.user.submitted_explanations.select_related('word')
         context['gamerounds'] = request.user.gamerounds.select_related('word')
+        context['bots'] = request.user.bots.all()
     return render(request, 'nbip/index.html', context)
 
 
@@ -46,6 +47,30 @@ def submit(request):
         'form': form,
     }
     return render(request, 'nbip/submit.html', context)
+
+
+class NewBotForm(ModelForm):
+    class Meta:
+        model = Bot
+        fields = ['name']
+
+@login_required()
+def new_bot(request):
+    if request.method == 'POST':
+        form = NewBotForm(request.POST)
+        if form.is_valid():
+            bot = form.save(commit=False)
+            bot.owner = request.user
+            bot.save()
+            messages.success(request, u"Dein Bot „%s“ wurde angelegt." % bot.name)
+            return redirect('index')
+    else:
+        form = NewBotForm()
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'nbip/new_bot.html', context)
 
 
 class ExplainForm(Form):
