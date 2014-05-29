@@ -128,10 +128,13 @@ $(function() {
 {% block title %}Willkommen{% endblock %}
 
 {% block content %}
+
+{% comment %}
 <div class="container">
 <p>Willkommen zum Programmierspiel der GPN’14.
 Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n_explanations }} Erklärung{{ n_explanations|pluralize:"en"}}.</p>
 </div>
+{% endcomment %}
 
 {% if user.is_authenticated %}
 <div class="container">
@@ -203,6 +206,36 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     <a href="{% url 'new_guess' %}">Mach das doch jetzt!</a>
    </p>
   {% endif %}
+  </div>
+ </div>
+</div>
+{% else %}
+<div class="container">
+ <div class="jumbotron">
+  <h1>Willkommen!</h1>
+  <div class="row">
+   <div class="col-sm-6">
+    <h2>Was ist No-Bot-Is-Perfect?</h2>
+    <p>Lorem ipsum...</p>
+    <p><a class="btn btn-primary btn-lg" role="button" href="{% url "registration_register" %}">Ja, ich will mitspielen!</a></p>
+   </div>
+   <div class="col-sm-4">
+    <h2>Schon dabei?</h2>
+    <form class="form" method="post" action="{% url 'django.contrib.auth.views.login' %}">
+     {% csrf_token %}
+     <div class="form-group">
+      <label class="sr-only" for="id_username">Benutzername</label>
+      <input type="text" class="form-control" name="username" id="id_username" maxlength="254" placeholder="Benutzername"/>
+     </div>
+     <div class="form-group">
+      <label class="sr-only" for="id_password">Passwort</label>
+      <input type="password" class="form-control" name="password" id="id_password" placeholder="Passwort" />
+     </div>
+     <input type="hidden" name="next" value="{{ next }}" />
+     <button type="submit" class="btn btn-default">Einloggen</button>
+     <a class="text-muted" href="{% url "password_reset" %}">Passwort vergessen?</a>
+    </form>
+   </div>
   </div>
  </div>
 </div>

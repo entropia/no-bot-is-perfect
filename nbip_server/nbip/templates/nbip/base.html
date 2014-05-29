@@ -93,15 +93,6 @@ body {
 <li class="{% current 'new_guess' return_value='active' %} {% current 'guess' return_value='active' %}"><a href="{% url 'new_guess' %}">Raten</a></li>
 </ul>
  
-{% if user.is_authenticated %}
-<div class="navbar-right">
-<p class="navbar-text">Hallo 
-<a href="{% url 'stats' %}" class="navbar-link">{{user}}</a>!</p>
-</div>
-{% else %}
-<a href="{% url 'registration_register' %}" class="navbar-right btn navbar-btn">Registrieren</a>
-<a href="{% url 'auth_login' %}" class="navbar-right btn navbar-btn">Einloggen</a>
-{% endif %}
 </div>
 </div>
 </nav>
@@ -127,9 +118,21 @@ body {
    <div class="container">
     <p class="text-muted navbar-text">
      <a href="https://github.com/entropia/no-bot-is-perfect">Source</a>
-     &bull;
+    </p>
+    <p class="text-muted navbar-text">
      <a href="https://github.com/entropia/no-bot-is-perfect/issues">Issues</a>
     </p>
+
+   {% if user.is_authenticated %}
+    <div class="navbar-right">
+     <p class="navbar-text">
+      Hallo <a href="{% url 'stats' %}" class="navbar-link">{{user}}</a>!
+     </p>
+    </div>
+   {% else %}
+    <a href="{% url 'registration_register' %}" class="navbar-right btn navbar-btn">Registrieren</a>
+    <a href="{% url 'auth_login' %}" class="navbar-right btn navbar-btn">Einloggen</a>
+   {% endif %}
   </div>
  </div>
 </div>
