@@ -213,6 +213,9 @@ $(function() {
 {% block content %}
 
 <div class="container">
+ <div class="row">
+  <div class="col-md-8">
+
  <h3>
   Highscore der Menschen
   <small>
@@ -249,9 +252,10 @@ $(function() {
   <tbody>
   </tbody>
  </table>
-</div>
 
-<div class="container">
+</div>
+<div class="col-md-4">
+
  <h3>
   Highscore der Bots
  </h3>
@@ -272,6 +276,9 @@ $(function() {
   <tbody>
   </tbody>
  </table>
+
+</div>
+</div>
 </div>
 
 {% endblock %}
