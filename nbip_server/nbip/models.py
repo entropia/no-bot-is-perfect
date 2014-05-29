@@ -508,11 +508,45 @@ class Stats(models.Model):
 
         self.save()
 
+class BotStats(models.Model):
+    bot = models.OneToOneField(Bot, primary_key=True)
+
+    n_tricked = models.PositiveIntegerField(
+            verbose_name = "Andere reingelegt",
+            default = 0)
+
+    n_not_tricked = models.PositiveIntegerField(
+            verbose_name = "Andere nicht reingelegt",
+            default = 0)
+
+    def attrs(self):
+        for field in self._meta.fields:
+            if type(field) == models.PositiveIntegerField:
+                yield field.verbose_name, getattr(self, field.name)
+
+    def update(self):
+        self.n_tricked = \
+            GameRoundEntry.objects \
+                .filter(explanation__bot = self.bot) \
+                .exclude(guess__exact = None) \
+                .exclude(guess = COMPUTER) \
+                .count()
+
+        self.n_not_tricked = \
+            GameRoundEntry.objects \
+                .filter(explanation__bot = self.bot) \
+                .exclude(guess__exact = None) \
+                .filter(guess = COMPUTER) \
+                .count()
+
+        self.save()
+
 # Keep Stats up-to-date
 @receiver(post_save, dispatch_uid="stats update")
 @receiver(post_delete, dispatch_uid="stats update 2")
 def update_stats(sender, instance, **kwargs):
     affected_users = set()
+    affected_bots = set()
     if type(instance) == Word:
         affected_users.add(instance.author)
     elif type(instance) == Explanation:
@@ -524,6 +558,7 @@ def update_stats(sender, instance, **kwargs):
             if e.explanation.type() == HUMAN:
                 affected_users.add(e.explanation.author)
             else:
+                affected_bots.add(e.explanation.bot)
                 affected_users.add(e.explanation.bot.owner)
 
     for u in affected_users:
@@ -534,3 +569,11 @@ def update_stats(sender, instance, **kwargs):
                 u.stats.save()
 
             u.stats.update()
+    for b in affected_bots:
+        if b:
+            # Create stats object
+            if not(hasattr(b, 'stats')):
+                b.stats = BotStats()
+                b.stats.save()
+
+            b.stats.update()

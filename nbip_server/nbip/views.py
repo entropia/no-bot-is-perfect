@@ -200,4 +200,12 @@ def highscore_data(request):
         'n_not_tricked',
         )
     data['rows'] = list(Stats.objects.select_related('user').values_list(*data['cols']))
+    data['bot_cols'] = (
+        'bot__id',
+        'bot__name',
+        'bot__owner__username',
+        'n_tricked',
+        'n_not_tricked',
+        )
+    data['bot_rows'] = list(BotStats.objects.select_related('bot','user').values_list(*data['bot_cols']))
     return HttpResponse(json.dumps(data), content_type="application/json")

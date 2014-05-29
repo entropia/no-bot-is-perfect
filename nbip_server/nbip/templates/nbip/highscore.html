@@ -2,25 +2,25 @@
 
 {% block page-css %}
 
-#highscore thead th {
+table.highscore thead th {
 	text-align:center;
 }
-#highscore thead th:nth-child(2) {
+table.highscore thead th:nth-child(2) {
 	text-align:left;
 }
 
-#highscore tbody td {
+table.highscore tbody td {
 	text-align:right;
 }
-#highscore tbody td:nth-child(2) {
+table.highscore tbody td:nth-child(2) {
 	text-align:left;
 }
 
-#highscore col.active {
+table.highscore col.active {
 	background-color: #F7F7F9;
 }
 
-#highscore thead th {
+table.highscore thead th {
 	background-color: white;
 }
 
@@ -29,6 +29,7 @@
 {% block page-js %}
 
 var highscorerows = [];
+var bothighscorerows = [];
 
 var highscores = [
 	{
@@ -60,8 +61,12 @@ var highscores = [
 // General helper to animate a few things
 function smooth_highscore (callback) {
 	var pos_now = {};
+	var bot_pos_now = {};
 	$("#highscore tbody tr").each(function (i,e) {
 		pos_now[$(e).data('user_id')] = $(e).offset();
+	});
+	$("#highscore-bot tbody tr").each(function (i,e) {
+		bot_pos_now[$(e).data('bot_id')] = $(e).offset();
 	});
 
 	callback();
@@ -69,6 +74,17 @@ function smooth_highscore (callback) {
 	// animate all motion
 	$("#highscore tbody tr").each(function (i,e) {
 		var e_pos_now = pos_now[$(e).data('user_id')];
+		if (e_pos_now) {
+			var e_pos_target = $(e).offset();
+
+			$(e).find("td > *").css('position', 'relative');
+			$(e).find("td > *").css('top', e_pos_now.top - e_pos_target.top);
+			$(e).find("td > *").css('left', e_pos_now.left - e_pos_target.left);
+			$(e).find("td > *").animate({left: 0, top: 0});
+		}
+	});
+	$("#highscore-bot tbody tr").each(function (i,e) {
+		var e_pos_now = bot_pos_now[$(e).data('bot_id')];
 		if (e_pos_now) {
 			var e_pos_target = $(e).offset();
 
@@ -116,12 +132,25 @@ function fillhighscoretable() {smooth_highscore(function() {
 	]).data('user_id', rowdata[0]);
 	$("#highscore tbody").append(r);
     });
+    $("#highscore-bot tbody").empty();
+    jQuery.map(bothighscorerows, function(rowdata,i) {
+	var r = $("<tr>").append([
+		cell(i+1),
+		cell("„" + rowdata[1] + "“ by " + rowdata[2]),
+		cell(rowdata[3]),
+		cell(rowdata[4]).addClass("small"),
+	]).data('bot_id', rowdata[0]);
+	$("#highscore-bot tbody").append(r);
+    });
 });}
 
 function sort_highscore() {
     var col = highscores[0]['col'];
     highscorerows.sort(function (a,b) {
 	    return (b[col] - a[col]);
+    });
+    bothighscorerows.sort(function (a,b) {
+	    return (b[4] - a[4]);
     });
 }
 
@@ -154,6 +183,15 @@ function update_highscore() {
 			score(row),
 		    ]]
 		});
+		bothighscorerows = jQuery.map(data['bot_rows'], function (row) {
+		    return [[
+			row[0],
+			row[1],
+			row[2],
+			row[3],
+			perc(row[3], row[4]),
+		    ]]
+		});
 		sort_highscore();
 		fillhighscoretable();
 	});
@@ -176,14 +214,14 @@ $(function() {
 
 <div class="container">
  <h3>
-  Highscores
+  Highscore der Menschen
   <small>
     <span id="highscore-prev"><span class="glyphicon glyphicon-chevron-left"></span></span>
     <span id="highscore-title">Bester Score</span>
     <span id="highscore-next"><span class="glyphicon glyphicon-chevron-right"></span></span>
   </small>
  </h3>
- <table class="table" id="highscore">
+ <table class="table highscore" id="highscore">
    <colgroup>
     <col width="0%"/>
     <col width="100%"/>
@@ -206,6 +244,29 @@ $(function() {
      <th colspan="2">Richtig geraten</th>
      <th colspan="2">Andere reingelegt</th>
      <th>Score</th>
+   </tr>
+  </thead>
+  <tbody>
+  </tbody>
+ </table>
+</div>
+
+<div class="container">
+ <h3>
+  Highscore der Bots
+ </h3>
+ <table class="table highscore" id="highscore-bot">
+   <colgroup>
+    <col width="0%"/>
+    <col width="100%"/>
+    <col width="0%"/>
+    <col class="active" width="0%"/>
+  </colgroup>
+  <thead>
+   <tr>
+     <th>#</th>
+     <th>Bot</th>
+     <th colspan="2">Andere reingelegt</th>
    </tr>
   </thead>
   <tbody>
