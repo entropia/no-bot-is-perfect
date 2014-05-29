@@ -4,7 +4,10 @@
 ul.contributions {
 	max-height:12em;
 	overflow-y:auto;
+}
 
+h4 {
+	white-space:nowrap;
 }
 
 {% endblock %}
@@ -23,13 +26,13 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
 {% if user.is_authenticated %}
 <div class="container">
  <div class="row">
-  <div class="col-sm-3">
-   <h3>
+  <div class="col-sm-6 col-md-2">
+   <h4>
     Deine Wörter
     <a class="btn btn-default btn-xs" href="{% url 'submit' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h3>
+   </h4>
    {% if words %}
     <ul class="list-group contributions">
      {% for w in words %}
@@ -46,13 +49,13 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
   {% endif %}
   </div>
 
-  <div class="col-sm-6">
-   <h3>
+  <div class="col-sm-6 col-md-6">
+   <h4>
     Deine Erklärungen
     <a class="btn btn-default btn-xs" href="{% url 'explain' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h3>
+   </h4>
    {% if expls  %}
     <ul class="list-group contributions">
      {% for e in expls %}
@@ -69,13 +72,15 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
   {% endif %}
   </div>
 
-  <div class="col-sm-3">
-   <h3>
+  <div class="clearfix visible-sm"></div>
+
+  <div class="col-sm-6 col-md-2">
+   <h4>
     Deine Spiele
     <a class="btn btn-default btn-xs" href="{% url 'new_guess' %}">
      <span class="glyphicon glyphicon-plus"></span>
     </a>
-   </h3>
+   </h4>
    {% if gamerounds %}
     <ul class="list-group contributions">
      {% for g in gamerounds %}
@@ -91,6 +96,30 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
    </p>
   {% endif %}
   </div>
+
+  <div class="col-sm-6 col-md-2">
+   <h4>
+    Deine Bots
+    <a class="btn btn-default btn-xs" href="{% url 'new_bot' %}">
+     <span class="glyphicon glyphicon-plus"></span>
+    </a>
+   </h4>
+   {% if bots %}
+    <ul class="list-group">
+     {% for b in bots %}
+      <li class="list-group-item">
+       {{b.name}}
+      </li>
+     {% endfor %}
+    </ul>
+   {% else %}
+    <p>
+     Du hast noch keinen Bot angelegt.
+     <a href="{% url 'new_bot' %}">Mach das doch jetzt!</a>
+    </p>
+   {% endif %}
+  </div>
+
  </div>
 </div>
 {% else %}
@@ -124,29 +153,5 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
  </div>
 </div>
 {% endif %}
-
-<div class="container">
-   <h3>
-    Deine Bots
-    <a class="btn btn-default btn-xs" href="{% url 'new_bot' %}">
-     <span class="glyphicon glyphicon-plus"></span>
-    </a>
-   </h3>
-   {% if bots %}
-    <ul class="list-group">
-     {% for b in bots %}
-      <li class="list-group-item">
-       {{b.name}}
-      </li>
-     {% endfor %}
-    </ul>
-   {% else %}
-    <p>
-     Du hast noch keinen Bot angelegt.
-     <a href="{% url 'new_bot' %}">Mach das doch jetzt!</a>
-    </p>
-   {% endif %}
-</div>
-
 
 {% endblock %}
