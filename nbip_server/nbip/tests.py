@@ -147,7 +147,7 @@ class SelectionMethodTests(NbipTestCase):
     def testNewRoundNoExplanations(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
         w1.save()
-        with self.assertRaises(NotEnoughWordsException):
+        with self.assertRaises(NotEnoughExplanationsException):
             round = GameRound.start_new_round(player = self.users[1])
 
     def testNewRoundOwnExplanations(self):

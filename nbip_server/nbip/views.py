@@ -127,8 +127,23 @@ def new_guess(request):
     else:
         try:
             round = GameRound.start_new_round(player = request.user)
+        except NotEnoughExplanationsException, e:
+            missing = u"(Es fehlen mindestens "
+            if e.missing_human_explanations() > 0:
+                missing += u"%d menschliche " % e.missing_human_explanations()
+            if e.missing_human_explanations() > 0 and e.missing_bot_explanations() > 0:
+                missing += u"und "
+            if e.missing_bot_explanations() > 0:
+                missing += u"%d computergenerierte " % e.missing_bot_explanations()
+            missing += u"Erklärungen bis zur nächsten Spielrunde.)"
+
+            messages.error(request,
+                u"Leider gibt es nicht genügend Erklärungen. " +
+                u"Motiviere deine Freunde, ein paar neue Erklärungen zu erfinden! " +
+                missing)
+            return redirect('index')
         except NotEnoughWordsException:
-            messages.error(request, u"Leider gibt es nicht genügend Erklärungen. Motiviere deine Freunde, ein paar neue Erklärungen zu erfinden!")
+            messages.error(request, u"Leider gibt es nicht genügend Wörter. Motiviere deine Freunde, ein paar neue Wörter einzugeben!")
             return redirect('index')
         return redirect('guess', round.pk)
 

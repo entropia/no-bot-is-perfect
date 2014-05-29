@@ -76,8 +76,12 @@ class NotEnoughWordsException(Exception):
     pass
 
 class NotEnoughExplanationsException(Exception):
-    pass
 
+    def missing_human_explanations(self):
+        return self.args[0]
+
+    def missing_bot_explanations(self):
+        return self.args[1]
 
 # Models
 
@@ -214,11 +218,21 @@ class Word(models.Model):
     @classmethod
     # similar to random, but only consider words with enough explanations
     def random_explained(cls, player):
-        words = cls.objects.filter(cls.q_answer_unseen(player), cls.q_complete())
+        candidates = cls.objects.filter(cls.q_answer_unseen(player))
+        words = candidates.filter(cls.q_complete())
 
         # fetches everything; be smarter if required
         if len(words) < 1:
-            raise NotEnoughWordsException()
+            best = candidates \
+                .order_by('-n_human_explanations', '-n_bot_explanations') \
+                .first()
+            if best:
+                raise NotEnoughExplanationsException(
+                        settings.HUMAN_EXPLANATIONS + 1 - best.n_human_explanations,
+                        settings.BOT_EXPLANATIONS + 1 - best.n_bot_explanations
+                    )
+            else:
+                raise NotEnoughWordsException()
         return random.choice(words)
 
     def update_cached_fields(self):
