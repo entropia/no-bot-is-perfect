@@ -5,6 +5,7 @@ from nbip import views, bot_views
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
     url(r'^stats/$', views.stats, name='stats'),
+    url(r'^highscore/$', views.highscore, name='highscore'),
 
     # human interaction
     url(r'^submit/$', views.submit, name='submit'),

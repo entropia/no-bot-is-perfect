@@ -25,6 +25,11 @@ def index(request):
         context['bots'] = request.user.bots.all()
     return render(request, 'nbip/index.html', context)
 
+def highscore(request):
+    context = {
+    }
+    return render(request, 'nbip/highscore.html', context)
+
 
 class SubmitForm(ModelForm):
     class Meta:
@@ -168,15 +173,6 @@ def view_guess(request, round_id):
         }
     return render(request, 'nbip/view_guess.html', context)
 
-def highscore(request):
-    # Multiple annotations across different tables do _not_ work!
-    # (Solution: Keep score in the user profile, update using triggers)
-    scores = User.objects \
-            .annotate(submitted_word_count = Count('submitted_words')) \
-            .annotate(submitted_explanation_count = Count('submitted_explanations')) \
-            .annotate(games_played = Count('gamerounds'))
-    print scores.query
-    return scores.values("username", "submitted_word_count", "submitted_explanation_count", "games_played")
 
 @login_required()
 def stats(request):
