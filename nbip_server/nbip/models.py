@@ -184,7 +184,7 @@ class Word(models.Model):
 
         needy_words = words \
             .filter(n_human_explanations__lte = settings.HUMAN_EXPLANATIONS) \
-            .order_by('-n_human_explanations')
+            .order_by('-n_human_explanations','-n_bot_explanations')
 
         # If there are words with insufficient answers, return the one that is closest
         # to having sufficient
@@ -205,7 +205,7 @@ class Word(models.Model):
 
         needy_words = words \
             .filter(n_bot_explanations__lte = settings.BOT_EXPLANATIONS) \
-            .order_by('-n_bot_explanations')
+            .order_by('-n_bot_explanations','-n_human_explanations')
 
         # If there are words with insufficient answers, return the one that is closest
         # to having sufficient
