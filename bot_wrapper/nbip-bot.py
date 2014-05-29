@@ -20,7 +20,7 @@
 #################################
 # but likely you want to do something smarter.
 
-NBIP_URL="http://localhost:8000/"
+NBIP_URL="http://no-bot-is-perfect.nomeata.de/"
 
 key = file('nbip-api.key').read().rstrip()
 

@@ -15,8 +15,8 @@ from nbip.models import *
 
 def index(request):
     context = {
-        'n_words': Word.objects.count(),
-        'n_explanations': Explanation.objects.count(),
+        # 'n_words': Word.objects.count(),
+        # 'n_explanations': Explanation.objects.count(),
     }
     if request.user.is_authenticated():
         context['words'] = request.user.submitted_words.all()
@@ -24,6 +24,7 @@ def index(request):
         context['gamerounds'] = request.user.gamerounds.select_related('word')
         context['bots'] = request.user.bots.all()
     return render(request, 'nbip/index.html', context)
+
 
 def highscore(request):
     context = {
@@ -173,6 +174,17 @@ def view_guess(request, round_id):
         }
     return render(request, 'nbip/view_guess.html', context)
 
+@login_required()
+def view_bot(request, bot_id):
+    bot = get_object_or_404(Bot.objects.select_related('owner'), pk=bot_id)
+    if bot.owner != request.user:
+        raise PermissionDenied
+
+    context = {
+            'bot': bot
+    }
+    context['expls'] = bot.submitted_explanations.select_related('word')
+    return render(request, 'nbip/bot.html', context)
 
 @login_required()
 def stats(request):

@@ -261,7 +261,7 @@ class Explanation(models.Model):
 
     # exactly one of these should be not null
     author = models.ForeignKey(User, verbose_name="Autor", blank=True, null=True, related_name="submitted_explanations")
-    bot = models.ForeignKey(Bot, verbose_name="Bot", blank=True, null=True)
+    bot = models.ForeignKey(Bot, verbose_name="Bot", blank=True, null=True, related_name="submitted_explanations")
 
     def clean(self):
         if self.author is None and self.bot is None:

@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^guess/$', views.new_guess, name='new_guess'),
     url(r'^guess/(\d+)/$', views.guess, name='guess'),
     url(r'^view_guess/(\d+)/$', views.view_guess, name='view_guess'),
+    url(r'^bot/(\d+)/$', views.view_bot, name='view_bot'),
 
     # bot management
     url(r'^new_bot/$', views.new_bot, name='new_bot'),

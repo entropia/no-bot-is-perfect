@@ -108,7 +108,7 @@ Wir spielen mit {{ n_words }} {{ n_words | pluralize:"Wort,Wörtern" }} und {{ n
     <ul class="list-group">
      {% for b in bots %}
       <li class="list-group-item">
-       {{b.name}}
+       <a href="{% url "view_bot" b.pk %}">{{b.name}}</a>
       </li>
      {% endfor %}
     </ul>
