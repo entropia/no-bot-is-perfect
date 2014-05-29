@@ -16,11 +16,46 @@
 	text-align:left;
 }
 
+#highscore col.active {
+	background-color: #F7F7F9;
+}
+
+#highscore thead th {
+	background-color: white;
+}
+
 {% endblock %}
 
 {% block page-js %}
 
 var highscorerows = [];
+
+var highscores = [
+	{
+		col: 9,
+		name: "Bester Score",
+	},
+	{
+		col: 2,
+		name: "Fleißigster Autor",
+	},
+	{
+		col: 3,
+		name: "Größter Erfinder",
+	},
+	{
+		col: 4,
+		name: "Aktivster Spieler",
+	},
+	{
+		col: 6,
+		name: "Größter Klugscheißer",
+	},
+	{
+		col: 8,
+		name: "Hinterhältigster Lügner",
+	},
+];
 
 // General helper to animate a few things
 function smooth_highscore (callback) {
@@ -64,7 +99,7 @@ function cell(c) {
 	return $("<td>").append($("<div>").text(c));
 }
 
-function fillhighscoretable() {smooth_highscore(function() { 
+function fillhighscoretable() {smooth_highscore(function() {
     $("#highscore tbody").empty();
     jQuery.map(highscorerows, function(rowdata,i) {
 	var r = $("<tr>").append([
@@ -83,27 +118,43 @@ function fillhighscoretable() {smooth_highscore(function() {
     });
 });}
 
+function sort_highscore() {
+    var col = highscores[0]['col'];
+    highscorerows.sort(function (a,b) {
+	    return (b[col] - a[col]);
+    });
+}
+
+function change_highscore(d) {
+    if (d < 0) { d += highscores.length };
+    highscores = highscores.slice(d).concat(highscores.slice(0,d));
+    $("#highscore-title").text(highscores[0]['name']);
+    $("#highscore col").removeClass('active');
+    $("#highscore col:nth-child(" + (highscores[0]['col'] + 1) + ")")
+	.addClass('active');
+    sort_highscore();
+    fillhighscoretable();
+}
+
 
 function update_highscore() {
     $.getJSON("{% url "highscore_data" %}")
 	.done(function (data) {
 		highscorerows = jQuery.map(data['rows'], function (row) {
-            return [[
-                row[0],
-                row[1],
-                row[2],
-                row[3],
-                row[4],
-                row[5],
-                perc(row[5], row[6]),
-                row[7],
-                perc(row[7], row[8]),
-                score(row),
-            ]]
-        });
-		highscorerows.sort(function (a,b) {
-			return (b[9]) - (a[9]);
+		    return [[
+			row[0],
+			row[1],
+			row[2],
+			row[3],
+			row[4],
+			row[5],
+			perc(row[5], row[6]),
+			row[7],
+			perc(row[7], row[8]),
+			score(row),
+		    ]]
 		});
+		sort_highscore();
 		fillhighscoretable();
 	});
     setTimeout(update_highscore, 30000);
@@ -111,6 +162,10 @@ function update_highscore() {
 
 $(function() {
     update_highscore();
+    change_highscore(0);
+
+    $("#highscore-prev").click(function(){change_highscore(-1)});
+    $("#highscore-next").click(function(){change_highscore(1)});
 })
 
 {% endblock %}
@@ -120,13 +175,26 @@ $(function() {
 {% block content %}
 
 <div class="container">
- <h3>Highscores</h3>
+ <h3>
+  Highscores
+  <small>
+    <span id="highscore-prev"><span class="glyphicon glyphicon-chevron-left"></span></span>
+    <span id="highscore-title">Bester Score</span>
+    <span id="highscore-next"><span class="glyphicon glyphicon-chevron-right"></span></span>
+  </small>
+ </h3>
  <table class="table" id="highscore">
    <colgroup>
     <col width="0%"/>
     <col width="100%"/>
-    <col width="0%" span="3"/>
-    <col width="0%" span="4"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
+    <col width="0%"/>
   </colgroup>
   <thead>
    <tr>
