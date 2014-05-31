@@ -579,7 +579,7 @@ def update_stats(sender, instance, **kwargs):
         if u:
             # Create stats object
             if not(hasattr(u, 'stats')):
-                u.stats = Stats()
+                u.stats = Stats(user=u)
                 u.stats.save()
 
             u.stats.update()
@@ -587,7 +587,7 @@ def update_stats(sender, instance, **kwargs):
         if b:
             # Create stats object
             if not(hasattr(b, 'stats')):
-                b.stats = BotStats()
+                b.stats = BotStats(bot=b)
                 b.stats.save()
 
             b.stats.update()
