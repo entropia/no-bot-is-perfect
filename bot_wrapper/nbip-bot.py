@@ -39,7 +39,7 @@ while True:
         print r.content
         sys.exit(0)
 
-    word = r.content
+    word = r.text
 
     print u"Eine Erklärung für %s wird gesucht..." % word
     expl = subprocess.check_output(['./bot', word]).rstrip()
@@ -51,7 +51,7 @@ while True:
             )
     if r.status_code != 200:
         print "Beim Einreichen ist ein Fehler aufgetreten:"
-        print r.content
+        print r.text
         sys.exit(0)
 
     print "Kurze Pause..."
