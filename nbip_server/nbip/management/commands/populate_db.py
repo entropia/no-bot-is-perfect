@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 "user%d" % i
             ))
         for i in range(len(users)):
-            Bot(owner = users[i], name = "bot%d" % i).save()
+            Bot(owner = users[i], name = "bot%d" % i, apikey="bot%d" %i).save()
         print "Dummy users created"
 
         # a word
@@ -49,8 +49,10 @@ class Command(BaseCommand):
 
         Explanation(word = w1, explanation = "katholische Reliquie", author = users[0]).save()
         Explanation(word = w1, explanation = "längliche Nudelform", author = users[1]).save()
+        Explanation(word = w1, explanation = "noch etwas", author = admin).save()
         Explanation(word = w1, explanation = "britischer Wahlkreis", bot = users[2].bots.get()).save()
         Explanation(word = w1, explanation = "magischer Charakter", bot = users[3].bots.get()).save()
+        Explanation(word = w1, explanation = "chinesischer Ausdruckstanz", bot = users[1].bots.get()).save()
         print "Example data created"
 
     def handle(self, *args, **options):
