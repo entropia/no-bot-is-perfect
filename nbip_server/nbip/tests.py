@@ -130,6 +130,18 @@ class SelectionMethodTests(NbipTestCase):
         with self.assertRaises(NotEnoughWordsException):
             Word.random(player=self.users[1])
 
+    def testRandomPlayedWord(self):
+        w1 = Word(lemma = 'Test', author=self.users[0])
+        w1.save()
+        self.addHumanExplanation(w1,1)
+        self.addHumanExplanation(w1,2)
+        self.addBotExplanation(w1,1)
+        self.addBotExplanation(w1,2)
+        round = GameRound.start_new_round(player = self.users[5])
+
+        with self.assertRaises(NotEnoughWordsException):
+            Word.random(player=self.users[5])
+
     def testNewRoundNoWord(self):
         with self.assertRaises(NotEnoughWordsException):
             round = GameRound.start_new_round(player = self.users[0])
