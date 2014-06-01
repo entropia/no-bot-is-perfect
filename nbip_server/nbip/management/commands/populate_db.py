@@ -49,10 +49,8 @@ class Command(BaseCommand):
 
         Explanation(word = w1, explanation = "katholische Reliquie", author = users[0]).save()
         Explanation(word = w1, explanation = "längliche Nudelform", author = users[1]).save()
-        Explanation(word = w1, explanation = "noch etwas", author = admin).save()
         Explanation(word = w1, explanation = "britischer Wahlkreis", bot = users[2].bots.get()).save()
         Explanation(word = w1, explanation = "magischer Charakter", bot = users[3].bots.get()).save()
-        Explanation(word = w1, explanation = "chinesischer Ausdruckstanz", bot = users[1].bots.get()).save()
         print "Example data created"
 
     def handle(self, *args, **options):

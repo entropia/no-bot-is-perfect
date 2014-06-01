@@ -242,7 +242,7 @@ class Word(models.Model):
                 candidates.filter(cls.q_possibly_complete()))
 
         # fetches everything; be smarter if required
-        if len(words) < 1:
+        if not words:
             best = candidates \
                 .order_by('-n_human_explanations', '-n_bot_explanations') \
                 .first()
@@ -352,20 +352,18 @@ class GameRound(models.Model):
         # pick a valid word where the user has not seen the answer before
         word = Word.random_explained(player=player)
 
-        # The word has not been seen by the user (not submitted by him, no
-        # explanations created by him, not played before).
-        # In particular, all explanations are not by him, so this check later
-        # is redundant.
-        # Later we might want to exclude this player's bot's explanations.
+        # fetch all possible explanations
+        # (excludes those by the current player, or his bots)
         human_expls = word.explanation_set \
             .filter(author__isnull = False) \
             .exclude(author = player)
-        bot_expls = word.explanation_set.filter(bot__isnull = False)
+        bot_expls = word.explanation_set.filter(bot__isnull = False) \
+            .exclude(bot__in = player.bots.all())
 
         assert len(human_expls) >= settings.HUMAN_EXPLANATIONS, \
-                    "n_human_explanations was not up to date?"
+                    "n_human_explanations was not up to date? Bug in Word.useable_for()?"
         assert len(bot_expls) >= settings.BOT_EXPLANATIONS, \
-                    "n_bot_explanations was not up to date?"
+                    "n_bot_explanations was not up to date? Bug in Word.useable_for()?"
         expl = random.sample(human_expls, settings.HUMAN_EXPLANATIONS) + \
                random.sample(bot_expls, settings.BOT_EXPLANATIONS)
 
