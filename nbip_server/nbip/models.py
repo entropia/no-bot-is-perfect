@@ -168,9 +168,8 @@ class Word(models.Model):
         return Q(~cls.q_owner(player) & ~cls.q_guessed(player))
 
     @classmethod
-    def q_complete(cls):
-        # +1 so that the players own explanation can be removed
-        return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS + 1) & \
+    def q_possibly_complete(cls):
+        return Q(n_human_explanations__gte = settings.HUMAN_EXPLANATIONS) & \
                Q(n_bot_explanations__gte   = settings.BOT_EXPLANATIONS)
 
     @classmethod
@@ -215,11 +214,32 @@ class Word(models.Model):
         # Otherwise return a random word
         return random.choice(words)
 
+    def usable_for(self, player):
+        usable_human_explanations = \
+            self.explanation_set \
+                .filter(author__isnull = False) \
+                .exclude(author = player) \
+                .count()
+
+        usable_bot_explanations = \
+            self.explanation_set \
+                .filter(bot__isnull = False) \
+                .exclude(bot__in = player.bots.all()) \
+                .count()
+
+        return (usable_human_explanations >= settings.HUMAN_EXPLANATIONS and
+                 usable_bot_explanations >= settings.BOT_EXPLANATIONS)
+
+
     @classmethod
     # similar to random, but only consider words with enough explanations
     def random_explained(cls, player):
-        candidates = cls.objects.filter(cls.q_answer_unseen(player))
-        words = candidates.filter(cls.q_complete())
+        candidates = cls.objects \
+            .filter(cls.q_answer_unseen(player))
+
+        # This could possibly be rewritten with SQL, but seems to be tricky
+        words = filter(lambda w: w.usable_for(player),
+                candidates.filter(cls.q_possibly_complete()))
 
         # fetches everything; be smarter if required
         if len(words) < 1:
@@ -227,9 +247,11 @@ class Word(models.Model):
                 .order_by('-n_human_explanations', '-n_bot_explanations') \
                 .first()
             if best:
+                # This is only an approximation, if the current user has explained that
+                # word already.
                 raise NotEnoughExplanationsException(
-                        settings.HUMAN_EXPLANATIONS + 1 - best.n_human_explanations,
-                        settings.BOT_EXPLANATIONS + 1 - best.n_bot_explanations
+                        settings.HUMAN_EXPLANATIONS - best.n_human_explanations,
+                        settings.BOT_EXPLANATIONS   - best.n_bot_explanations
                     )
             else:
                 raise NotEnoughWordsException()
