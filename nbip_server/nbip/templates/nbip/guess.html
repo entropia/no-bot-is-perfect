@@ -101,46 +101,56 @@ $(function (){
 
 {% block content %}
 <div class="container">
-<p>Was mag denn ein/eine <strong>{{ word.lemma }}</strong> sein?</p>
+ <h2>
+  <small>Was mag denn ein/eine</small>
+  {{ word.lemma }}
+  <small>sein?</small>
+ </h2>
 
-<form class="form-horizontal" role="form" method="POST">
-{% csrf_token %}
+ <form role="form" method="POST">
+  {% csrf_token %}
 
-{% for k, v in counts.items %}
-<input type="hidden" class="result-count" name="count-{{k}}" value="{{v}}" />
-{% endfor %}
+  {% for k, v in counts.items %}
+   <input type="hidden" class="result-count" name="count-{{k}}" value="{{v}}" />
+  {% endfor %}
 
-{% for e in explanations %}
-<div class="form-group" style="display: none">
- <label for="guess{{forloop.counter0}}" class="col-sm-4 control-label">{{ e.text }}</label>
- <div class="col-sm-2">
-  <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
-   <option value=""></option>
-   <option value="0">Richtig</option>
-   <option value="1">Mensch</option>
-   <option value="2">Computer</option>
-  </select>
- </div>
-</div>
-{% endfor %}
+  {% for e in explanations %}
+   <div class="form-group" style="display: none">
+   <label for="guess{{forloop.counter0}}" class="col-sm-4 control-label">{{ e.text }}</label>
+    <div class="col-sm-2">
+     <select id="id_guess{{forloop.counter0}}" name="guess{{forloop.counter0}}">
+      <option value=""></option>
+      <option value="0">Richtig</option>
+      <option value="1">Mensch</option>
+      <option value="2">Computer</option>
+     </select>
+    </div>
+   </div>
+  {% endfor %}
 
-<div class="container-fluid form-group">
+ <div class="container-fluid">
   <div class="row">
    {% for e in explanations %}
-    <div class="col-sm-4">
+    <div class="col-md-4 col-sm-6">
      <div class="panel panel-default answer-panel">
       <table><tr>
- 	<td class="answer-icon-holder">
-	 <img class="answer-placeholder" src="{% static "empty.png" %}"/>
-	</td>
-	<td>
-         {{ e.text }}
-	</td>
+       <td class="answer-icon-holder">
+	    <img class="answer-placeholder" src="{% static "empty.png" %}"/>
+	   </td>
+       <td>
+        {{ e.text }}
+	   </td>
       </tr></table>
      </div>
     </div>
+   {% if forloop.counter|divisibleby:"3" %}
+    <div class="clearfix visible-md"></div>
+   {% endif %}
+   {% if forloop.counter|divisibleby:"2" %}
+    <div class="clearfix visible-sm"></div>
+   {% endif %}
    {% endfor %}
-   <div class="col-sm-4 text-center">
+   <div class="col-md-4 col-md-6 text-center">
     <div id="answer-icons">
      {% for answer, count in counts.items %}
       {% for i in count|countup %}
@@ -151,9 +161,9 @@ $(function (){
     <input  class="btn btn-default" type="submit" value="Fertig!"/>
    </div>
   </div>
-</div>
+ </div>
 
-</form>
+ </form>
 </div>
 
 {% endblock %}

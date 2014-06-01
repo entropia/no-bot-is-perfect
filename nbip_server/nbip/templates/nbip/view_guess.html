@@ -6,12 +6,16 @@
 {% block content %}
 
 <div class="container">
-<p>Ein/eine <b>{{ word.lemma }}</b> ist also ein/eine <b>{{ word.clean_explanation }}</b>. <a href="{{ word.link }}">Zweifel?</a></p>
+ <h2><small>Ein/eine</small> <b>{{ word.lemma }}</b> <small>...</small></h2>
+ <p>
+   ...ist also ein/eine <b>{{ word.clean_explanation }}</b>.
+   <a href="{{ word.link }}">Zweifel?</a>
+ </p>
 
-<div class="container-fluid form-group">
+ <div class="container-fluid form-group">
   <div class="row">
    {% for e in explanations %}
-    <div class="col-sm-4">
+    <div class="col-md-4 col-sm-6">
      <div class="panel panel-default answer-panel">
       <table>
        <tr>
@@ -31,13 +35,19 @@
       </table>
      </div>
     </div>
+
+   {% if forloop.counter|divisibleby:"3" %}
+    <div class="clearfix visible-md"></div>
+   {% endif %}
+   {% if forloop.counter|divisibleby:"2" %}
+    <div class="clearfix visible-sm"></div>
+   {% endif %}
    {% endfor %}
-   <div class="col-sm-4 text-center">
+   <div class="col-sm-6 col-md-4 text-center">
     <a href="{% url "new_guess" %}" class="btn btn-default">Nochmal spielen</a>
    </div>
   </div>
-</div>
-
+ </div>
 
 </div>
 
