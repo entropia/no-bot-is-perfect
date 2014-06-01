@@ -95,11 +95,6 @@ class SelectionMethodTests(NbipTestCase):
     def setUp(self):
         self.addUsers()
 
-# all the tests related to choosing correct words/explanations
-class SelectionMethodTests(NbipTestCase):
-    def setUp(self):
-        self.addUsers()
-
     def testRandomNoWord(self):
         with self.assertRaises(NotEnoughWordsException):
             Word.random(player = self.users[0])
