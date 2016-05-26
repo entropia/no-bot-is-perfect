@@ -145,7 +145,7 @@ ABSOLUTE_URL_OVERRIDES = {
 }
 
 HUMAN_EXPLANATIONS = 2
-BOT_EXPLANATIONS = 2
+BOT_EXPLANATIONS = 0
 
 def show_toolbar(request):
     if request.is_ajax():
