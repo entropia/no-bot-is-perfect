@@ -168,14 +168,15 @@ class SelectionMethodTests(NbipTestCase):
             round = GameRound.start_new_round(player = self.users[1])
 
     def testNewRoundNotEnoughOwnBotExplanations(self):
-        w1 = Word(lemma = 'Test', author=self.users[0])
-        w1.save()
-        self.addHumanExplanation(w1,2)
-        self.addHumanExplanation(w1,3)
-        self.addBotExplanation(w1,1)
-        self.addBotExplanation(w1,2)
-        with self.assertRaises(NotEnoughExplanationsException):
-            round = GameRound.start_new_round(player = self.users[1])
+        with self.settings(HUMAN_EXPLANATIONS=2,BOT_EXPLANATIONS=2):
+            w1 = Word(lemma = 'Test', author=self.users[0])
+            w1.save()
+            self.addHumanExplanation(w1,2)
+            self.addHumanExplanation(w1,3)
+            self.addBotExplanation(w1,1)
+            self.addBotExplanation(w1,2)
+            with self.assertRaises(NotEnoughExplanationsException):
+                round = GameRound.start_new_round(player = self.users[1])
 
     def testNewRoundOwnExplanations(self):
         w1 = Word(lemma = 'Test', author=self.users[0])
